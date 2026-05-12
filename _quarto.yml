@@ -17,22 +17,19 @@ website:
       - href: schedule.qmd
         text: Cronograma
 
-      - text: "Semana 1 · Fundamentos"
+      - text: "Aulas"
         menu:
+          - text: "— Semana 1 · Fundamentos —"
           - href: lectures/week01/aula01.qmd
             text: "Aula 1 — Dados Digitais em RI"
           - href: lectures/week01/aula02.qmd
             text: "Aula 2 — Ética e Legalidade"
-
-      - text: "Semana 2 · Web Foundations"
-        menu:
+          - text: "— Semana 2 · Web Foundations —"
           - href: lectures/week02/aula03.qmd
             text: "Aula 3 — HTML e CSS"
           - href: lectures/week02/aula04.qmd
             text: "Aula 4 — Requests HTTP"
-
-      - text: "Semanas 3–4 · Scraping Estático"
-        menu:
+          - text: "— Semanas 3–4 · Scraping Estático —"
           - href: lectures/week03/aula05.qmd
             text: "Aula 5 — Introdução ao rvest"
           - href: lectures/week03/aula06.qmd
@@ -41,30 +38,22 @@ website:
             text: "Aula 7 — Paginação e Loops"
           - href: lectures/week04/aula08.qmd
             text: "Aula 8 — Robustez e Erros"
-
-      - text: "Semana 5 · Scraping Dinâmico"
-        menu:
+          - text: "— Semana 5 · Scraping Dinâmico —"
           - href: lectures/week05/aula09.qmd
             text: "Aula 9 — JavaScript e Conteúdo Dinâmico"
           - href: lectures/week05/aula10.qmd
             text: "Aula 10 — Automação com Selenium"
-
-      - text: "Semana 6 · Pipelines"
-        menu:
+          - text: "— Semana 6 · Pipelines —"
           - href: lectures/week06/aula11.qmd
             text: "Aula 11 — Organização de Projetos"
           - href: lectures/week06/aula12.qmd
             text: "Aula 12 — Pipelines com targets"
-
-      - text: "Semana 7 · Texto e NLP"
-        menu:
+          - text: "— Semana 7 · Texto e NLP —"
           - href: lectures/week07/aula13.qmd
             text: "Aula 13 — NLP com quanteda"
           - href: lectures/week07/aula14.qmd
             text: "Aula 14 — Aplicações em RI"
-
-      - text: "Semana 8 · Projeto"
-        menu:
+          - text: "— Semana 8 · Projeto —"
           - href: lectures/week08/aula15.qmd
             text: "Aula 15 — Projeto Final"
 
