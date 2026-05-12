@@ -1,0 +1,131 @@
+/*-- scss:defaults --*/
+
+// Brand colours
+$primary:   #003366;
+$secondary: #336699;
+$accent:    #FF6600;
+$light-bg:  #f8f9fa;
+$code-bg:   #1e1e2e;
+
+// Typography
+$font-family-sans-serif: "Inter", "Segoe UI", system-ui, sans-serif;
+$font-family-monospace:  "JetBrains Mono", "Fira Code", "Courier New", monospace;
+$presentation-font-size-root: 32px;
+$presentation-h1-font-size: 1.8em;
+$presentation-h2-font-size: 1.4em;
+$presentation-h3-font-size: 1.1em;
+
+/*-- scss:rules --*/
+
+// ── Reveal.js slides ────────────────────────────────────────────────
+
+.reveal {
+  font-family: $font-family-sans-serif;
+
+  h1, h2, h3 {
+    color: $primary;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    border-bottom: 4px solid $accent;
+    padding-bottom: 0.2em;
+  }
+
+  // Highlighted code blocks
+  pre code {
+    font-family: $font-family-monospace;
+    font-size: 0.75em;
+    line-height: 1.5;
+  }
+
+  // Callout / alert boxes inside slides
+  .callout {
+    border-left: 4px solid $accent;
+    background: lighten($accent, 45%);
+    padding: 0.6em 1em;
+    border-radius: 4px;
+    margin: 0.8em 0;
+  }
+
+  // Two-column layout helper
+  .columns-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2em;
+    align-items: start;
+  }
+
+  // Badge / tag chips
+  .badge {
+    display: inline-block;
+    background: $primary;
+    color: white;
+    border-radius: 4px;
+    padding: 0.15em 0.5em;
+    font-size: 0.65em;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+
+  // Footer override
+  .footer {
+    font-size: 0.5em;
+    color: lighten($primary, 40%);
+  }
+
+  // Title slide
+  .title-slide {
+    background: linear-gradient(135deg, $primary 60%, $secondary 100%);
+    color: white !important;
+
+    h1, h2, p {
+      color: white !important;
+    }
+
+    h1 {
+      border-bottom: 3px solid $accent;
+    }
+  }
+}
+
+// ── HTML document (website) ─────────────────────────────────────────
+
+body {
+  font-family: $font-family-sans-serif;
+}
+
+// Navbar brand colour
+.navbar {
+  background-color: $primary !important;
+}
+
+// Sidebar / TOC active link
+.sidebar-navigation .sidebar-item-text.active {
+  color: $accent;
+  font-weight: 600;
+}
+
+// Inline code
+code {
+  font-family: $font-family-monospace;
+  font-size: 0.88em;
+  color: darken($secondary, 10%);
+  background: $light-bg;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+
+// Custom callout colours
+.callout-tip {
+  border-left-color: #28a745;
+}
+
+.callout-important {
+  border-left-color: $accent;
+}
+
+.callout-warning {
+  border-left-color: #ffc107;
+}

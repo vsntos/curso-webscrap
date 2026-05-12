@@ -1,0 +1,333 @@
+---
+title: "Aula 1"
+subtitle: "Dados Digitais em Relações Internacionais"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+
+    # tema base
+    theme: simple
+
+    # css customizado institucional
+    css: custom.scss
+
+    # layout
+    width: 1600
+    height: 900
+
+    # navegação
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    # transições
+    transition: fade
+    background-transition: fade
+
+    # ferramentas
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    # visual
+    center: false
+    smaller: false
+    toc: false
+
+    # rodapé
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    # highlight de código
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Infraestrutura Digital, Web Scraping e Observabilidade Política
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# A Transformação Digital da Política Internacional
+
+## Estados, parlamentos e organizações internacionais
+## produzem rastros digitais continuamente.
+
+Hoje podemos observar:
+
+- diplomacia;
+- legislativos;
+- conflitos;
+- organizações internacionais;
+- mídia;
+- burocracias estatais.
+
+## em escala computacional.
+
+# Antes da Era Digital
+
+## Fontes tradicionais
+
+- arquivos físicos
+- entrevistas
+- jornais impressos
+- documentos diplomáticos
+- surveys.
+
+## Limitações
+
+- custo;
+- escala;
+- tempo;
+- acesso.
+
+# A Transformação Digital
+
+## A política internacional produz rastros digitais
+
+- websites governamentais;
+- redes sociais;
+- bases legislativas;
+- APIs;
+- notícias online;
+- PDFs;
+- discursos
+
+# A Web como Infraestrutura Política
+
+## Websites não são apenas interfaces
+
+Eles são:
+
+- sistemas de registro;
+- mecanismos de sinalização;
+- instrumentos institucionais;
+- arquivos políticos.
+
+
+# Exemplos em Relações Internacionais
+
+## Diplomacia Digital
+
+- Itamaraty;
+- ONU;
+- OTAN;
+- embaixadas.
+
+## Dados Legislativos
+
+- sabatinas;
+- tratados;
+- discursos;
+- comissões.
+
+# Exemplo Empírico
+
+## Senado Brasileiro
+
+Perguntas possíveis:
+
+- Quando o Senado reage à política externa?
+- Como medir controle legislativo?
+- O atraso institucional é observável?
+
+# Web Scraping
+
+## O que é?
+
+Coleta automatizada de dados web.
+
+## O que podemos coletar?
+
+- textos;
+- tabelas;
+- links;
+- PDFs;
+- metadados.
+
+# Scraping não é apenas técnica
+
+## É construção de evidência
+
+O verdadeiro objetivo:
+
+# transformar rastros digitais em dados científicos.
+
+# Tipos de Dados Digitais
+
+| Tipo | Exemplo |
+|---|---|
+| Texto | notícias |
+| Metadado | datas |
+| Rede | hyperlinks |
+| Institucional | votações |
+| Temporal | séries históricas |
+| Multimodal | imagens/vídeos |
+
+# O Pipeline Científico
+
+## Fluxo
+
+1. pergunta de pesquisa;
+2. coleta;
+3. limpeza;
+4. estruturação;
+5. análise;
+6. inferência.
+
+# Exemplo de Pipeline
+
+```{r}
+# Exemplo de Pipeline
+
+library(tidyverse)
+library(xml2)
+library(rvest)
+library(lubridate)
+
+
+# 1. Função: busca RSS do Google News ------------------------------------
+get_google_news <- function(query) {
+  
+  url <- paste0(
+    "https://news.google.com/rss/search?q=",
+    URLencode(query),
+    "&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+  )
+  
+  rss <- tryCatch(read_xml(url), error = function(e) NULL)
+  if (is.null(rss)) return(tibble())
+  
+  items <- xml_find_all(rss, "//item")
+  if (length(items) == 0) return(tibble())
+  
+  lc_orig <- Sys.getlocale("LC_TIME")
+  Sys.setlocale("LC_TIME", "C")
+  on.exit(Sys.setlocale("LC_TIME", lc_orig))
+  
+  tibble(
+    title    = xml_text(xml_find_first(items, "title")),
+    link     = xml_text(xml_find_first(items, "link")),
+    pub_date = xml_text(xml_find_first(items, "pubDate")),
+    source   = xml_text(xml_find_first(items, "source")),
+    query    = query
+  ) %>%
+    mutate(
+      pub_date = as.POSIXct(
+        strptime(
+          sub(" [A-Z]+$", "", pub_date),  # remove "GMT" antes de parsear
+          "%a, %d %b %Y %H:%M:%S",
+          tz = "UTC"
+        )
+      )
+    )
+}
+
+# 2. Queries -------------------------------------------------------------
+
+queries <- c(
+  "diplomacia",
+  "Irã",
+  "Trump"
+)
+
+
+# 3. Coleta e filtro por data --------------------------------------------
+# Sem after:/before: na URL — o RSS retorna os ~100 resultados mais recentes
+# e filtramos por pub_date aqui
+
+df_news <- purrr::map_dfr(queries, get_google_news) %>%
+  filter(
+    !is.na(pub_date),
+    pub_date >= as.POSIXct("2025-04-10", tz = "UTC"),
+    pub_date <  as.POSIXct("2026-04-16", tz = "UTC")
+  ) %>%
+  distinct(link, .keep_all = TRUE)   # remove duplicatas entre queries
+
+```
+
+# O que aprenderemos
+
+## Módulo I — Foundations
+  - HTML;
+  - CSS;
+  - HTTP;
+  - APIs.
+        
+## Módulo II — Scraping
+  - rvest;
+  - Selenium;
+  - automação.
+
+## Módulo III — Pipelines
+- limpeza;
+- normalização;
+- reproducibilidade;
+- targets.
+
+## Módulo IV — NLP
+- quanteda;
+- embeddings;
+- análise textual.
+
+# O Futuro do Scraping
+
+# De scraping para semantic extraction
+
+## A web está mudando:
+
+- páginas dinâmicas;
+- APIs ocultas;
+- conteúdo multimodal;
+- LLMs;
+- agentes autônomos;
+- extração semântica;
+- browsers automatizados.
+
+# O que significa pesquisar hoje?
+
+## Pesquisar é construir infraestrutura de dados.
+
+A pesquisa computacional moderna envolve:
+
+- coleta;
+- estruturação;
+- automação;
+- inferência;
+- reprodutibilidade;
+- pipelines semânticos.
+
+# Exercício
+
+## Construção de pergunta de pesquisa
+
+Escolha um fenômeno internacional.
+
+Identifique:
+
+- qual dado digital existe;
+- onde ele está;
+- como poderia ser coletado;
+- quais limitações possui.
+
+# Próxima Aula
+
+## Ética, Legalidade e Desenho de Pesquisa
+
+- scraping vs APIs;
+- termos de uso;
+- viés;
+- validade inferencial.
+
+# Obrigado
+
+## Perguntas?
+  

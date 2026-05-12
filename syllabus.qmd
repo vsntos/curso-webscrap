@@ -1,0 +1,151 @@
+---
+title: "Ementa"
+subtitle: "Web Scraping e Dados Digitais em Relações Internacionais"
+---
+
+## Identificação
+
+| | |
+|---|---|
+| **Disciplina** | Web Scraping e Dados Digitais em Relações Internacionais |
+| **Programa** | PPGRI — Programa de Pós-Graduação em Relações Internacionais |
+| **Nível** | Mestrado / Doutorado |
+| **Carga horária** | 45h (15 aulas de 3h) |
+| **Modalidade** | Presencial com materiais digitais abertos |
+| **Docente** | Vinicius Santos |
+| **Ano** | 2026 |
+
+---
+
+## Descrição
+
+A produção de dados digitais tornou-se uma das principais matérias-primas da pesquisa contemporânea em Relações Internacionais. Notícias, declarações diplomáticas, votações em organismos multilaterais, fluxos comerciais e redes de menções entre atores internacionais estão disponíveis em escala sem precedentes — mas raramente em formato pronto para análise.
+
+Esta disciplina capacita pesquisadores do campo das RI a coletar, organizar e analisar esses dados usando R. Partimos dos fundamentos de como a web funciona (HTML, HTTP, APIs) e avançamos por técnicas de web scraping estático e dinâmico, organização de projetos reprodutíveis e análise de texto aplicada a questões substantivas de RI — framing midiático, agenda-setting, análise de sentimento de cobertura diplomática e mapeamento de redes de atores.
+
+O curso privilegia a aplicação imediata: cada aula combina conceitos técnicos com dados e casos do campo.
+
+---
+
+## Objetivos
+
+Ao final do curso, o(a) estudante será capaz de:
+
+1. Compreender a arquitetura da web (HTML, CSS, HTTP, JSON) o suficiente para planejar estratégias de coleta.
+2. Coletar dados de páginas estáticas com `rvest` e de APIs com `httr2`.
+3. Automatizar navegação em páginas dinâmicas com `RSelenium` e `chromote`.
+4. Organizar projetos de dados seguindo princípios de reprodutibilidade.
+5. Construir pipelines declarativas com `targets`.
+6. Aplicar ferramentas básicas de NLP (`quanteda`) para análise de corpus de textos em português.
+7. Formular e responder perguntas substantivas de RI com dados digitais.
+
+---
+
+## Conteúdo programático
+
+### Módulo 1 — Fundamentos (Semanas 1–2)
+
+**Aula 1 — Dados Digitais em RI**
+Por que dados digitais importam para a pesquisa em RI. Tipologia: dados estruturados, semi-estruturados e não-estruturados. Fontes: APIs governamentais, portais de notícias, organismos internacionais. Introdução ao R e ao ecossistema tidyverse. Primeiro exercício: coleta de RSS.
+
+**Aula 2 — Ética, Legalidade e Boas Práticas**
+Robots.txt e Termos de Serviço. LGPD e proteção de dados. Legalidade do scraping em diferentes jurisdições. Rate limiting e comportamento respeitoso. Questões éticas na pesquisa com dados públicos digitais.
+
+**Aula 3 — HTML e CSS: A Estrutura da Web**
+Anatomia de uma página HTML. Tags semânticas. CSS selectors. DevTools do navegador para inspeção. XPath básico. Exercício: mapear estrutura de portais de notícias e de sites de organismos internacionais.
+
+**Aula 4 — Requisições HTTP e APIs**
+Protocolo HTTP: verbos, status codes, cabeçalhos. Pacote `httr2`. APIs RESTful e formato JSON. Autenticação com chaves de API. Banco Mundial, GDELT, UN Comtrade.
+
+### Módulo 2 — Scraping Estático (Semanas 3–4)
+
+**Aula 5 — Introdução ao rvest**
+Workflow completo: `read_html` → `html_elements` → `html_text2` / `html_attr`. Scraping de listas, tabelas e parágrafos. Depuração com SelectorGadget.
+
+**Aula 6 — Estruturando e Limpando Dados**
+Combinar múltiplas páginas com `bind_rows`. Limpeza de texto com `stringr`. Normalização de datas com `lubridate`. Deduplicação. Variáveis derivadas. Exportação para CSV e RDS.
+
+**Aula 7 — Paginação e Automação com Loops**
+Identificação de padrões de URL. `for` loops vs `purrr::map`. Raspagem até página vazia (`while`). Seguimento de links internos. Batch saving e monitoramento de progresso.
+
+**Aula 8 — Robustez e Tratamento de Erros**
+`tryCatch`, `possibly`, `safely`. Retry com backoff exponencial. Logging estruturado. Timeout e codificação de caracteres. Validação de dados coletados.
+
+### Módulo 3 — Scraping Dinâmico (Semana 5)
+
+**Aula 9 — JavaScript e Conteúdo Dinâmico**
+Diferença entre conteúdo estático e dinâmico. DevTools → aba Network. APIs ocultas: como identificar e replicar requisições AJAX. `chromote` para renderização JavaScript. `cURL` export para R.
+
+**Aula 10 — Automação com Selenium**
+Arquitetura RSelenium. `rsDriver`, `findElement`, `sendKeysToElement`. Scroll infinito. Paginação por clique. Login automatizado. Estratégias de espera. Boas práticas de uso.
+
+### Módulo 4 — Infraestrutura e Reprodutibilidade (Semana 6)
+
+**Aula 11 — Organização de Projetos**
+Estrutura de pastas: `raw/`, `processed/`, `scripts/`, `outputs/`. Convenções de nomenclatura. `.Renviron` para segredos. `renv` para ambientes reprodutíveis. `.gitignore` para projetos de dados. Geração automática de README.
+
+**Aula 12 — Pipelines com targets**
+Pipeline declarativa vs scripts sequenciais. Estrutura de `_targets.R`. `tar_target`, `tar_make`, `tar_read`. Cache inteligente. `format = "url"` para rastrear mudanças em páginas. Integração com Quarto para relatórios automáticos.
+
+### Módulo 5 — Análise de Texto (Semana 7)
+
+**Aula 13 — NLP com quanteda**
+Corpus, tokens, DFM (Document-Feature Matrix). Stopwords em português. Keyness: termos distintivos entre grupos. Wordcloud. Redes de co-ocorrência (FCM). Dicionários temáticos. Análise de sentimento.
+
+**Aula 14 — Aplicações em RI**
+Análise de framing com keyness. Agenda-setting: comparação de cobertura entre portais. GDELT Project: tom e volume de menções. Redes de co-menção entre atores internacionais. Integração com dados do Banco Mundial.
+
+### Módulo 6 — Projeto Final (Semana 8)
+
+**Aula 15 — Projeto Final e Apresentações**
+Estrutura do projeto entregável. Checklist de reprodutibilidade. Apresentações dos grupos. Discussão de limitações e extensões.
+
+---
+
+## Avaliação
+
+| Instrumento | Peso | Descrição |
+|---|---|---|
+| Participação e exercícios de aula | 20% | Entrega semanal dos scripts adaptados |
+| Trabalho individual | 30% | Coleta e análise de dataset de RI (entrega na semana 6) |
+| Projeto final em grupo | 50% | Pipeline completa: coleta → limpeza → análise → visualização → relatório |
+
+### Critérios do projeto final
+
+- Pergunta substantiva de RI claramente formulada
+- Coleta automatizada e reprodutível (mínimo 500 documentos)
+- Pipeline documentada com `targets`
+- Análise com pelo menos duas técnicas do curso
+- Relatório Quarto renderizável por terceiros
+- Repositório Git organizado
+
+---
+
+## Referências
+
+### Scraping e R
+
+- Hvitfeldt, E. & Silge, J. *Tidy Text Mining with R*. O'Reilly, 2022.
+- Bryan, J. et al. *R for Data Science* (2ª ed.). O'Reilly, 2023.
+- Mitchell, R. *Web Scraping with Python* (conceitos transferíveis). O'Reilly, 2018.
+
+### Métodos digitais em RI
+
+- Grimmer, J.; Roberts, M.; Stewart, B. *Text as Data*. Princeton UP, 2022.
+- Leetaru, K.; Schrodt, P. A. "GDELT: Global Data on Events, Location and Tone." *ISA Annual Convention*, 2013.
+- King, G.; Pan, J.; Roberts, M. "How Censorship in China Allows Government Criticism but Silences Collective Expression." *APSR*, 2013.
+
+### Reprodutibilidade
+
+- Landau, W. M. "The targets R package: a dynamic function-oriented Make-like declarative workflow system." *JOSS*, 2021.
+- Wilson, G. et al. "Good enough practices in scientific computing." *PLOS Computational Biology*, 2017.
+
+---
+
+## Recursos
+
+- [Documentação do Quarto](https://quarto.org)
+- [quanteda Tutorials](https://tutorials.quanteda.io)
+- [GDELT Project](https://www.gdeltproject.org)
+- [Banco Mundial API](https://datahelpdesk.worldbank.org/knowledgebase/articles/889392)
+- [rvest](https://rvest.tidyverse.org) · [httr2](https://httr2.r-lib.org) · [targets](https://docs.ropensci.org/targets/)

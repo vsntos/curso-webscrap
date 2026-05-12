@@ -1,0 +1,364 @@
+---
+title: "Aula 13"
+subtitle: "Introdução ao NLP com quanteda"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Introdução ao NLP com quanteda
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# Do Dado Bruto à Evidência
+
+## Até agora coletamos textos
+
+Títulos, resumos, artigos completos.
+
+Mas texto é dado não estruturado.
+
+Precisamos transformá-lo em **evidência analítica**.
+
+## NLP: Natural Language Processing
+
+Conjunto de técnicas para extrair estrutura e significado de textos.
+
+# Por que quanteda?
+
+## O pacote de referência para NLP em R
+
+- desenvolvido por Kenneth Benoit (LSE);
+- muito usado em Ciência Política;
+- eficiente com grandes corpora;
+- integra com tidyverse.
+
+```{r}
+#| eval: false
+install.packages("quanteda")
+install.packages("quanteda.textstats")
+install.packages("quanteda.textplots")
+```
+
+# O Pipeline NLP
+
+## Fluxo padrão
+
+```
+texto bruto
+    ↓
+corpus (quanteda)
+    ↓
+tokens
+    ↓
+DFM (Document-Feature Matrix)
+    ↓
+análise
+```
+
+# Corpus
+
+## Objeto central do quanteda
+
+```{r}
+library(quanteda)
+library(tidyverse)
+
+titulos <- c(
+  "ONU debate reforma do Conselho de Segurança",
+  "BRICS avança em moeda alternativa ao dólar",
+  "OTAN amplia presença militar no Leste Europeu",
+  "Brasil e China assinam acordos comerciais",
+  "Irã rejeita proposta nuclear do Ocidente"
+)
+
+corp <- corpus(
+  titulos,
+  docnames = paste0("doc", 1:5)
+)
+
+corp
+```
+
+## Adicionar metadados
+
+```{r}
+datas <- as.Date(c(
+  "2026-05-12", "2026-05-11", "2026-05-10",
+  "2026-05-09", "2026-05-08"
+))
+
+docvars(corp, "data")  <- datas
+docvars(corp, "fonte") <- "Agência Brasil"
+
+summary(corp)
+```
+
+# Tokenização
+
+## Quebrar texto em tokens
+
+```{r}
+toks <- tokens(
+  corp,
+  remove_punct    = TRUE,
+  remove_numbers  = TRUE,
+  remove_symbols  = TRUE
+)
+
+toks[1]
+```
+
+## Remover stopwords
+
+```{r}
+stopwords_pt <- c(
+  stopwords("pt"),
+  "que", "com", "para", "por", "mais", "uma", "dos",
+  "das", "nos", "nas", "seu", "sua", "são", "está"
+)
+
+toks_limpos <- tokens_remove(toks, stopwords_pt)
+
+toks_limpos[1]
+```
+
+## Ngrams: combinações de palavras
+
+```{r}
+toks_ngrams <- tokens_ngrams(toks_limpos, n = 2)
+
+toks_ngrams[1:2]
+```
+
+# Document-Feature Matrix (DFM)
+
+## A matriz principal
+
+```{r}
+dfm_corp <- dfm(toks_limpos)
+
+dfm_corp
+```
+
+## Frequência de features
+
+```{r}
+library(quanteda.textstats)
+
+freq <- textstat_frequency(dfm_corp)
+head(freq, 10)
+```
+
+# Visualizações
+
+## Frequência como gráfico
+
+```{r}
+library(ggplot2)
+
+textstat_frequency(dfm_corp, n = 10) |>
+  ggplot(aes(x = reorder(feature, frequency), y = frequency)) +
+  geom_col(fill = "#003366") +
+  coord_flip() +
+  labs(title = "Palavras mais frequentes", x = "", y = "Frequência") +
+  theme_minimal()
+```
+
+## Nuvem de palavras
+
+```{r}
+#| eval: false
+library(quanteda.textplots)
+
+textplot_wordcloud(
+  dfm_corp,
+  max_words  = 50,
+  color      = c("#003366", "#336699", "#6699CC")
+)
+```
+
+# Keyness: Comparação de Corpora
+
+## Quais palavras distinguem grupos?
+
+```{r}
+titulos_seg <- c(
+  "ONU debate reforma multilateral",
+  "Brasil lidera negociações climáticas",
+  "BRICS amplia acordos econômicos",
+  "OTAN anuncia novas bases militares",
+  "EUA sancionam aliados do Kremlin",
+  "Conflito no Oriente Médio se intensifica"
+)
+
+grupo <- c("sul", "sul", "sul", "norte", "norte", "norte")
+
+corp_seg <- corpus(titulos_seg)
+docvars(corp_seg, "grupo") <- grupo
+
+dfm_seg <- corp_seg |>
+  tokens(remove_punct = TRUE) |>
+  tokens_remove(stopwords("pt")) |>
+  dfm() |>
+  dfm_group(groups = grupo)
+
+keyness <- textstat_keyness(dfm_seg, target = "sul")
+head(keyness)
+```
+
+## Visualizar keyness
+
+```{r}
+#| eval: false
+textplot_keyness(keyness)
+```
+
+# Co-ocorrências
+
+## Quais palavras aparecem juntas?
+
+```{r}
+fcm_corp <- fcm(toks_limpos, context = "window", window = 2)
+fcm_corp
+```
+
+```{r}
+#| eval: false
+# Visualizar rede de co-ocorrências
+feat <- names(topfeatures(fcm_corp, 15))
+fcm_select(fcm_corp, feat) |>
+  textplot_network()
+```
+
+# Dicionários
+
+## Classificar textos por tema
+
+```{r}
+dicionario_ri <- dictionary(list(
+  multilateralismo = c("onu", "otan", "brics", "g20",
+                        "multilateral", "conselho", "assembléia"),
+  conflito         = c("guerra", "conflito", "sanções",
+                        "militar", "ataque", "defesa"),
+  economia         = c("comércio", "exportação", "pib",
+                        "tarifa", "moeda", "dólar")
+))
+
+dfm_dict <- dfm_lookup(dfm_corp, dictionary = dicionario_ri)
+
+convert(dfm_dict, to = "data.frame")
+```
+
+# Sentiment: Polaridade
+
+## Classificar tom positivo / negativo
+
+```{r}
+#| eval: false
+# Dicionário de valência para português
+dict_valence <- dictionary(list(
+  positivo = c("acordo", "cooperação", "parceria",
+               "paz", "progresso", "avanço"),
+  negativo = c("conflito", "sanção", "crise",
+               "tensão", "ruptura", "guerra")
+))
+
+dfm_sent <- dfm_lookup(dfm_corp, dictionary = dict_valence)
+
+# Calcular escore
+scores <- convert(dfm_sent, to = "data.frame") |>
+  mutate(escore = positivo - negativo)
+
+scores
+```
+
+# Análise Longitudinal
+
+## Frequência ao longo do tempo
+
+```{r}
+#| eval: false
+# Com metadado de data
+dfm_por_mes <- dfm_corp |>
+  dfm_group(groups = format(docvars(corp, "data"), "%Y-%m"))
+
+# Frequência de "onu" por mês
+textstat_frequency(dfm_por_mes, groups = "grupo")
+```
+
+# Aplicações em RI
+
+## O que podemos medir com NLP
+
+| Conceito | Técnica |
+|---|---|
+| Agenda midiática | frequência por período |
+| Framing | keyness entre portais |
+| Polaridade | análise de sentimento |
+| Redes de atores | co-ocorrências |
+| Posição de um ator | dicionário temático |
+| Evolução discursiva | frequência longitudinal |
+
+# Exercício
+
+## Análise de corpus de notícias
+
+Use o dataset coletado nas aulas anteriores.
+
+1. Crie um `corpus()` com os títulos;
+2. Adicione `data` e `portal` como docvars;
+3. Tokenize e remova stopwords;
+4. Construa DFM;
+5. Visualize as 20 palavras mais frequentes;
+6. Crie dicionário com 3 temas de RI;
+7. Aplique `dfm_lookup()`;
+8. Analise: qual tema domina? Varia por portal?
+
+# Próxima Aula
+
+## Aplicações em RI
+
+- framing na cobertura de política externa;
+- agenda-setting e prioridades midiáticas;
+- integração com GDELT Project;
+- conectar métodos com teoria de RI.
+
+# Obrigado
+
+## Perguntas?

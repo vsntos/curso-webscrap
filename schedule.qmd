@@ -1,0 +1,277 @@
+---
+title: "Cronograma"
+subtitle: "Web Scraping e Dados Digitais em Relações Internacionais · 2026"
+---
+
+```{r}
+#| echo: false
+#| message: false
+library(tibble)
+library(knitr)
+```
+
+## Visão Geral
+
+O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto semana 8), totalizando 15 aulas de 3 horas cada.
+
+::: {.callout-note}
+**Entrega do trabalho individual:** ao final da Semana 6 (após Aula 12).
+**Apresentações do projeto final:** Aula 15.
+:::
+
+---
+
+## Semana 1 — Fundamentos e Panorama
+
+| | |
+|---|---|
+| **Tema** | Dados Digitais em RI; Ética e Legalidade |
+| **Pacotes** | `tidyverse`, `httr2`, `jsonlite` |
+| **Dados** | RSS Google News, API Banco Mundial |
+
+### Aula 1 — Dados Digitais em Relações Internacionais
+
+- Por que dados digitais importam para a pesquisa em RI
+- Tipologia de fontes: APIs, portais, feeds RSS, redes sociais
+- Ambiente R + Quarto: configuração e primeiro projeto
+- **Exercício:** coletar e explorar RSS do Google News Brasil
+
+**Script:** `scripts/aula01_rss_google_news.R`
+
+### Aula 2 — Ética, Legalidade e Boas Práticas
+
+- Robots.txt, Termos de Serviço, LGPD
+- Rate limiting e comportamento respeitoso
+- APIs institucionais: Banco Mundial, GDELT, IBGE
+- **Exercício:** explorar API do Banco Mundial com `httr2`
+
+**Script:** `scripts/aula02_apis_banco_mundial.R`
+
+---
+
+## Semana 2 — Web Foundations
+
+| | |
+|---|---|
+| **Tema** | HTML, CSS e Requisições HTTP |
+| **Pacotes** | `rvest`, `httr2`, `xml2` |
+| **Dados** | Portais de notícias, Banco Mundial, GDELT |
+
+### Aula 3 — HTML e CSS: A Estrutura da Web
+
+- Anatomia de uma página HTML: tags, atributos, árvore DOM
+- CSS selectors: classe, id, descendência, pseudo-classes
+- DevTools do navegador: inspeção e cópia de seletores
+- XPath básico como alternativa
+- **Exercício:** mapear seletores de três portais de RI
+
+**Script:** `scripts/aula03_html_css_estrutura.R`
+
+### Aula 4 — Requisições HTTP e APIs
+
+- Protocolo HTTP: verbos, cabeçalhos, status codes
+- Pacote `httr2`: construir, executar e processar requisições
+- APIs RESTful e formato JSON
+- Autenticação: API keys e .Renviron
+- **Exercício:** coletar dados do Banco Mundial e GDELT
+
+**Script:** `scripts/aula04_requests_http.R`
+
+---
+
+## Semanas 3–4 — Scraping Estático
+
+| | |
+|---|---|
+| **Tema** | rvest, limpeza, paginação e robustez |
+| **Pacotes** | `rvest`, `stringr`, `lubridate`, `purrr` |
+| **Dados** | Agência Brasil, ONU Brasil, portais nacionais |
+
+### Aula 5 — Introdução ao rvest
+
+- Workflow: `read_html` → `html_elements` → `html_text2`/`html_attr`
+- Scraping de listas, parágrafos e tabelas
+- Atributos: `href`, `src`, datas em `<time>`
+- SelectorGadget para identificação rápida
+- **Exercício:** scraping completo da Agência Brasil
+
+**Script:** `scripts/aula05_scraping_rvest.R`
+
+### Aula 6 — Estruturando e Limpando Dados
+
+- Combinar páginas com `bind_rows` e listas
+- Limpeza: `str_squish`, `str_remove`, regex para RI
+- Normalização de datas e enriquecimento com variáveis derivadas
+- Deduplicação e validação
+- **Exercício:** construir dataset limpo de 100+ notícias
+
+**Script:** `scripts/aula06_estruturando_dados.R`
+
+### Aula 7 — Paginação e Automação com Loops
+
+- Padrões de URL: `?page=`, `?offset=`, `/pagina/`
+- `for` loops vs `purrr::map_dfr`
+- Raspar até página vazia com `while`
+- Seguir links internos e rastrear aulas
+- **Exercício:** coletar múltiplos portais com loop paginado
+
+**Script:** `scripts/aula07_paginacao_loops.R`
+
+### Aula 8 — Robustez e Tratamento de Erros
+
+- `tryCatch`, `possibly`, `safely`
+- Retry com backoff exponencial
+- Logging estruturado em arquivo
+- Timeout, codificação, validação de dados coletados
+- **Exercício:** scraper robusto com log e relatório de execução
+
+**Script:** `scripts/aula08_robustez_erros.R`
+
+---
+
+## Semana 5 — Scraping Dinâmico
+
+| | |
+|---|---|
+| **Tema** | JavaScript, APIs ocultas e Selenium |
+| **Pacotes** | `chromote`, `RSelenium`, `httr2` |
+| **Dados** | Portais com JavaScript, GDELT streaming |
+
+### Aula 9 — JavaScript e Conteúdo Dinâmico
+
+- Estático vs dinâmico: como identificar
+- DevTools → aba Network: interceptar requisições
+- APIs ocultas: replicar AJAX com `httr2`
+- `chromote` para renderização JavaScript
+- **Exercício:** capturar API oculta de portal de notícias
+
+**Script:** `scripts/aula09_javascript_dinamico.R`
+
+### Aula 10 — Automação com Selenium
+
+- Arquitetura RSelenium: driver, navegador, sessão
+- `findElement`, `sendKeysToElement`, `clickElement`
+- Scroll infinito e paginação por clique
+- Login automatizado e espera condicional
+- **Exercício:** scraping de portal com login e scroll infinito
+
+**Script:** `scripts/aula10_selenium_automacao.R`
+
+---
+
+## Semana 6 — Infraestrutura e Reprodutibilidade {#semana-6}
+
+| | |
+|---|---|
+| **Tema** | Organização de projetos e pipelines |
+| **Pacotes** | `fs`, `renv`, `targets`, `tarchetypes` |
+| **Entrega** | ⚠️ Trabalho individual ao final desta semana |
+
+### Aula 11 — Organização de Projetos
+
+- Estrutura de pastas: `raw/`, `processed/`, `scripts/`, `outputs/`
+- Convenções de nomenclatura e versionamento de arquivos
+- `.Renviron` para segredos; `renv` para ambientes
+- `.gitignore` para projetos de dados; README automático
+- **Exercício:** reorganizar projeto pessoal com `fs`
+
+**Script:** `scripts/aula11_organizacao_projetos.R`
+
+### Aula 12 — Pipelines com targets
+
+- Pipeline declarativa vs scripts sequenciais
+- Estrutura de `_targets.R`; `tar_target`, `tar_make`, `tar_read`
+- Cache inteligente e rastreamento de dependências
+- `format = "url"` para monitorar mudanças em páginas
+- Integração com Quarto: relatório automático ao rodar pipeline
+- **Exercício:** converter projeto em pipeline targets
+
+**Script:** `scripts/aula12_pipelines_targets.R`
+
+> **⚠️ Trabalho individual:** entregar até domingo ao final desta semana.
+
+---
+
+## Semana 7 — Texto e NLP
+
+| | |
+|---|---|
+| **Tema** | Análise de texto e aplicações em RI |
+| **Pacotes** | `quanteda`, `quanteda.textstats`, `quanteda.textplots` |
+| **Dados** | Corpus de notícias coletado nas semanas anteriores |
+
+### Aula 13 — NLP com quanteda
+
+- Corpus, tokens, DFM (Document-Feature Matrix)
+- Stopwords em português e normalização
+- Keyness: termos distintivos entre grupos de documentos
+- Redes de co-ocorrência (FCM)
+- Dicionários temáticos e análise de sentimento
+- **Exercício:** análise comparativa de dois portais de RI
+
+**Script:** `scripts/aula13_nlp_quanteda.R`
+
+### Aula 14 — Aplicações em RI
+
+- Análise de framing com keyness por portal/período
+- Agenda-setting: comparar ênfases temáticas
+- GDELT: tom e volume de cobertura de eventos internacionais
+- Redes de co-menção entre atores internacionais com `igraph`
+- Integração com dados econômicos do Banco Mundial
+- **Exercício:** analisar framing de tema de RI nos últimos 6 meses
+
+**Script:** `scripts/aula14_aplicacoes_ri.R`
+
+---
+
+## Semana 8 — Projeto Final
+
+| | |
+|---|---|
+| **Tema** | Consolidação e apresentações |
+| **Entrega** | Projeto final completo |
+
+### Aula 15 — Apresentações e Encerramento
+
+- Apresentações dos grupos (15 min + 5 min perguntas)
+- Checklist de reprodutibilidade: o projeto roda no computador do avaliador?
+- Discussão de limitações, vieses e extensões
+- Próximos passos: publicação, expansão, integração com outras técnicas
+- **Entrega:** repositório Git + relatório Quarto renderizado
+
+**Script:** `scripts/aula15_projeto_final_template.R`
+
+---
+
+## Datas e Prazos
+
+```{r}
+#| echo: false
+prazos <- tribble(
+  ~Data,        ~Evento,
+  "Semana 1",   "Início do curso — configuração do ambiente R + Quarto",
+  "Semana 2",   "Primeiro exercício avaliado: script de coleta via API",
+  "Semana 4",   "Proposta do trabalho individual (1 parágrafo + fonte)",
+  "Semana 6",   "⚠️ Entrega do trabalho individual",
+  "Semana 7",   "Formação dos grupos e proposta do projeto final",
+  "Semana 8",   "⚠️ Entrega e apresentação do projeto final"
+)
+
+kable(prazos, align = c("l", "l"))
+```
+
+---
+
+## Formato das Aulas
+
+Cada aula de 3 horas segue a estrutura:
+
+| Bloco | Duração | Conteúdo |
+|---|---|---|
+| 1 | 60 min | Exposição teórico-conceitual (slides) |
+| Intervalo | 10 min | — |
+| 2 | 50 min | Demonstração ao vivo (código) |
+| 3 | 60 min | Exercício prático guiado |
+
+Os slides de cada aula estão disponíveis no menu **Semana X** da barra de navegação.
+Os scripts comentados estão no menu **Scripts**.

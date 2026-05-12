@@ -1,0 +1,395 @@
+---
+title: "Aula 12"
+subtitle: "Pipelines Automatizados com targets"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Pipelines Automatizados com targets
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# O Problema da Re-execução
+
+## Scripts encadeados têm problemas
+
+```
+01_coleta.R   → 02_limpeza.R   → 03_analise.R
+```
+
+Se mudar `02_limpeza.R`:
+
+- precisa re-executar `03_analise.R`;
+- mas não precisa re-executar `01_coleta.R` (re-raspar!);
+- difícil saber o que está desatualizado.
+
+## Sem controle de dependências
+
+- re-execução desnecessária;
+- risco de raspar o site de novo sem precisar;
+- resultados inconsistentes entre partes.
+
+# O que é targets?
+
+## Pipeline declarativo em R
+
+`targets` define o **grafo de dependências** do seu projeto.
+
+Ele sabe:
+
+- quais etapas dependem de quais;
+- quais estão desatualizadas;
+- quais podem ser puladas.
+
+## Caching inteligente
+
+Se nada mudou, o target não re-executa.
+
+Se `02_limpeza.R` mudou, `03_analise.R` re-executa automaticamente.
+
+Mas `01_coleta.R` permanece cacheado.
+
+# Estrutura de um Pipeline
+
+## Arquivo _targets.R
+
+```{r}
+#| eval: false
+library(targets)
+library(tidyverse)
+library(rvest)
+
+source("scripts/utils/scraper.R")
+source("scripts/utils/limpeza.R")
+
+list(
+
+  # 1. Coletar dados
+  tar_target(
+    name = dados_brutos,
+    command = coletar_noticias(paginas = 0:9)
+  ),
+
+  # 2. Limpar dados
+  tar_target(
+    name = dados_limpos,
+    command = limpar_dataset(dados_brutos)
+  ),
+
+  # 3. Analisar
+  tar_target(
+    name = frequencia_palavras,
+    command = calcular_frequencia(dados_limpos)
+  ),
+
+  # 4. Visualizar
+  tar_target(
+    name = grafico_frequencia,
+    command = plotar_frequencia(frequencia_palavras),
+    format = "file"
+  )
+)
+```
+
+# Comandos Principais
+
+## Executar o pipeline
+
+```{r}
+#| eval: false
+library(targets)
+
+# Ver o status de cada target
+tar_manifest()
+
+# Visualizar o grafo de dependências
+tar_visnetwork()
+
+# Executar apenas o que está desatualizado
+tar_make()
+
+# Forçar re-execução de um target específico
+tar_invalidate("dados_brutos")
+tar_make()
+```
+
+## Acessar resultados
+
+```{r}
+#| eval: false
+# Ler resultado cacheado
+df <- tar_read(dados_limpos)
+
+# Carregar em memória
+tar_load(dados_limpos)
+```
+
+# Anatomia de um tar_target()
+
+## Parâmetros principais
+
+```{r}
+#| eval: false
+tar_target(
+  name    = nome_do_target,     # nome (sem aspas)
+  command = funcao_que_executa(), # código R
+  format  = "rds",              # formato de cache (rds, file, feather...)
+  pattern = map(urls)           # para targets em paralelo
+)
+```
+
+## Formatos de armazenamento
+
+| Format | Quando usar |
+|---|---|
+| `"rds"` | objetos R em geral (padrão) |
+| `"feather"` | dataframes grandes |
+| `"file"` | arquivos (CSV, PNG, etc.) |
+| `"url"` | verificar mudanças em URLs |
+
+# Detectar Mudanças na Web
+
+## tar_target com format = "url"
+
+```{r}
+#| eval: false
+list(
+
+  # Monitora se a URL mudou
+  tar_target(
+    name   = url_agencia_brasil,
+    command = "https://agenciabrasil.ebc.com.br/internacional",
+    format = "url"
+  ),
+
+  # Só re-raspa se a URL mudou
+  tar_target(
+    name    = dados_brutos,
+    command = coletar_noticias(url_agencia_brasil),
+    pattern = NULL
+  )
+)
+```
+
+# Pipeline Completo: Exemplo de RI
+
+## _targets.R para monitoramento de mídia
+
+```{r}
+#| eval: false
+library(targets)
+library(tidyverse)
+library(rvest)
+library(quanteda)
+
+source("scripts/utils/scraper.R")
+source("scripts/utils/limpeza.R")
+source("scripts/utils/nlp.R")
+
+list(
+
+  # CAMADA 1: COLETA
+  tar_target(noticias_agencia,
+    coletar_agencia_brasil(paginas = 0:4)),
+
+  tar_target(noticias_onu,
+    coletar_onu_brasil(paginas = 0:2)),
+
+  # CAMADA 2: INTEGRAÇÃO
+  tar_target(corpus_bruto,
+    bind_rows(noticias_agencia, noticias_onu)),
+
+  # CAMADA 3: LIMPEZA
+  tar_target(corpus_limpo,
+    limpar_corpus(corpus_bruto)),
+
+  # CAMADA 4: NLP
+  tar_target(tokens,
+    tokenizar(corpus_limpo)),
+
+  tar_target(dfm,
+    construir_dfm(tokens)),
+
+  # CAMADA 5: OUTPUTS
+  tar_target(fig_frequencia,
+    plotar_frequencia(dfm),
+    format = "file"),
+
+  tar_target(tabela_atores,
+    extrair_atores(corpus_limpo),
+    format = "file")
+)
+```
+
+# Paralelismo com targets
+
+## Executar targets em paralelo
+
+```{r}
+#| eval: false
+library(targets)
+library(crew)
+
+# Configurar workers paralelos
+tar_option_set(
+  controller = crew_controller_local(workers = 4)
+)
+
+# tar_make() usará até 4 processos
+tar_make()
+```
+
+## Mapear sobre múltiplas URLs
+
+```{r}
+#| eval: false
+list(
+  tar_target(
+    urls,
+    paste0("https://portal.com?page=", 0:9)
+  ),
+
+  tar_target(
+    paginas_raspadas,
+    raspar_pagina(urls),
+    pattern = map(urls)  # um target por URL
+  ),
+
+  tar_target(
+    dataset_final,
+    bind_rows(paginas_raspadas)
+  )
+)
+```
+
+# Visualizando o Pipeline
+
+## tar_visnetwork()
+
+```{r}
+#| eval: false
+tar_visnetwork()
+```
+
+Mostra:
+
+- nós = targets;
+- arestas = dependências;
+- cores = status (ok, desatualizado, em progresso).
+
+# Integração com Quarto
+
+## Renderizar relatório como target
+
+```{r}
+#| eval: false
+list(
+
+  # ... targets anteriores ...
+
+  tar_quarto(
+    name = relatorio_final,
+    path = "docs/relatorio.qmd"
+  )
+)
+```
+
+```yaml
+# relatorio.qmd:
+---
+title: "Cobertura Internacional"
+execute:
+  echo: false
+---
+```{r}
+tar_load(corpus_limpo)
+```
+```
+
+# Boas Práticas com targets
+
+## Funções puras
+
+Cada target deve depender apenas dos seus inputs.
+
+```{r}
+#| eval: false
+# Ruim: função com efeito colateral oculto
+limpar <- function(df) {
+  write_csv(df, "data/processed/limpo.csv")  # esconde dependência
+  df
+}
+
+# Bom: função pura, output declarado como target
+limpar <- function(df) {
+  df |>
+    mutate(titulo = str_squish(titulo)) |>
+    filter(nchar(titulo) > 20)
+}
+```
+
+# Exercício
+
+## Pipeline simples de scraping → análise
+
+Crie `_targets.R` com:
+
+1. Target `urls_coleta` — vetor de 5 URLs;
+2. Target `dados_brutos` — scraping das URLs;
+3. Target `dados_limpos` — limpeza do dataset;
+4. Target `frequencia` — contagem de palavras;
+5. Target `grafico` — visualização salva em PNG.
+
+Execute com `tar_make()`.
+
+Modifique a função de limpeza e veja quais targets re-executam.
+
+# Próxima Aula
+
+## Introdução ao NLP com quanteda
+
+- tokenização;
+- document-feature matrix;
+# análise de frequência;
+- nuvem de palavras;
+- aplicação em RI.
+
+# Obrigado
+
+## Perguntas?

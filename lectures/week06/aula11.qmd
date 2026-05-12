@@ -1,0 +1,403 @@
+---
+title: "Aula 11"
+subtitle: "Organização de Projetos"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Organização de Projetos
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# Pensar como Pesquisador
+
+## Não apenas como programador
+
+Código que funciona hoje pode:
+
+-   ser incompreensível em 6 meses;
+-   depender de pacotes descontinuados;
+-   produzir resultados diferentes ao re-executar;
+-   ser impossível de auditar.
+
+## Reprodutibilidade é padrão científico
+
+Pesquisa computacional deve ser:
+
+-   **reproduzível** — outros conseguem re-executar;
+-   **auditável** — outros conseguem verificar;
+-   **documentada** — outros entendem o que foi feito.
+
+# Estrutura de Pastas
+
+## Projeto padrão de scraping em RI
+
+``` text
+meu_projeto/
+├── data/
+│   ├── raw/          # dados brutos, nunca editados
+│   └── processed/    # dados limpos e prontos
+├── scripts/
+│   ├── 01_coleta.R
+│   ├── 02_limpeza.R
+│   └── 03_analise.R
+├── outputs/
+│   ├── figures/
+│   └── tables/
+├── docs/
+│   └── metodologia.md
+├── logs/
+│   └── scraping_20260512.txt
+├── .Renviron          # variáveis secretas (não vai ao Git)
+├── .gitignore
+└── README.md
+```
+
+# Separação Raw / Processed
+
+## Por que nunca modificar raw?
+
+-   raw é o registro histórico da coleta;
+-   se algo der errado no processamento, você tem o original;
+-   permite reprocessar sem re-raspar;
+-   facilita auditoria.
+
+## Princípio
+
+```         
+raw/   → escrever uma vez, nunca sobrescrever
+processed/ → resultado de scripts reproduzíveis
+```
+
+# Naming Conventions
+
+## Arquivos de dados
+
+```         
+# Ruim
+dados.csv
+final.csv
+novo_final.csv
+FINAL_v3_USE_THIS.csv
+
+# Bom
+noticias_agenciabrasil_20260512.csv
+votacoes_camara_2025.csv
+pib_brics_worldbank_2000_2024.csv
+```
+
+## Scripts
+
+```         
+# Ruim
+scraping.R
+limpeza_final.R
+analise.R
+
+# Bom
+01_coleta_agenciabrasil.R
+02_limpeza_texto.R
+03_analise_frequencia.R
+```
+
+## Convenções
+
+-   sem espaços — use `_` ou `-`;
+-   tudo em minúsculas;
+-   datas em ISO: `YYYYMMDD`;
+-   numeração para scripts sequenciais.
+
+# .Renviron: Segredos
+
+## Nunca coloque credenciais no código
+
+``` r
+# NUNCA:
+api_key <- "abc123secreto"
+
+# SEMPRE:
+api_key <- Sys.getenv("MINHA_API_KEY")
+```
+
+## \~/.Renviron
+
+``` bash
+# Arquivo em ~/ (home do usuário)
+NEWS_API_KEY=abc123secreto
+PORTAL_USER=meu_usuario
+PORTAL_SENHA=minha_senha
+WTO_KEY=chave_aqui
+```
+
+```{r}
+#| eval: false
+# Recarregar após editar
+readRenviron("~/.Renviron")
+
+# Acessar
+Sys.getenv("NEWS_API_KEY")
+```
+
+# .gitignore
+
+## O que nunca vai ao repositório
+
+``` bash
+# .gitignore
+.Renviron
+*.csv              # dados podem ser grandes
+data/raw/          # dados brutos são reproduzíveis via script
+*.html             # outputs renderizados
+.DS_Store
+*.Rhistory
+.Rdata
+logs/
+```
+
+## O que sempre vai ao repositório
+
+``` bash
+# Sempre versionar:
+scripts/
+docs/
+README.md
+.gitignore
+renv.lock          # versões dos pacotes
+```
+
+# Reprodutibilidade de Pacotes
+
+## O problema
+
+Pacotes mudam entre versões.
+
+O que funciona em maio de 2026 pode quebrar em 2027.
+
+## renv: lockfile de pacotes
+
+```{r}
+#| eval: false
+install.packages("renv")
+
+# Iniciar renv no projeto
+renv::init()
+
+# Salvar versões atuais
+renv::snapshot()
+
+# Restaurar ambiente em outro computador
+renv::restore()
+```
+
+# README.md
+
+## Documentação mínima obrigatória
+
+``` markdown
+# Projeto: Cobertura Internacional na Mídia Brasileira
+
+## Pergunta de Pesquisa
+Como a mídia brasileira cobre temas de política internacional?
+
+## Fonte de Dados
+- Agência Brasil (agenciabrasil.ebc.com.br)
+- ONU Brasil (brasil.un.org)
+
+## Como Reproduzir
+1. Clone o repositório
+2. Instale R >= 4.3
+3. Execute `renv::restore()`
+4. Execute os scripts em ordem: 01 → 02 → 03
+
+## Período de Coleta
+Mai/2026 — scripts coletaram 547 notícias em 3 sessões.
+
+## Estrutura de Pastas
+[...]
+```
+
+# Documentação no Código
+
+## Comentários úteis
+
+```{r}
+#| eval: false
+# Ruim:
+# Função que raspa a página
+raspar <- function(url) { ... }
+
+# Bom:
+# Extrai títulos e links da seção internacional da AB.
+# Retorna tibble vazio se a página falhar ou estiver vazia.
+# Delay mínimo de 1.5s entre chamadas (ver robots.txt).
+raspar_agencia_brasil <- function(url, delay = 1.5) { ... }
+```
+
+## Cabeçalho de script
+
+```{r}
+#| eval: false
+# =========================================================
+# Projeto: Cobertura Internacional
+# Script:  02_limpeza.R
+# Entrada: data/raw/noticias_*.csv
+# Saída:   data/processed/corpus_final.csv
+# Última atualização: 2026-05-12
+# =========================================================
+```
+
+# Versionamento com Git
+
+## Commits como caderno de laboratório
+
+``` bash
+# Ruim
+git commit -m "mudanças"
+git commit -m "fix"
+
+# Bom
+git commit -m "coleta: adicionar Agência Brasil pag 0-9"
+git commit -m "limpeza: normalizar datas para ISO 8601"
+git commit -m "analise: frequência de atores por mês"
+```
+
+## Ramos para experimentos
+
+``` bash
+git checkout -b experimento/selenium-camara
+# ... testa Selenium na Câmara ...
+git checkout main
+git merge experimento/selenium-camara
+```
+
+# Estrutura de Funções
+
+## Um arquivo por responsabilidade
+
+```         
+scripts/
+├── utils/
+│   ├── scraper.R     # funções de coleta
+│   ├── limpeza.R     # funções de limpeza
+│   └── helpers.R     # funções auxiliares
+├── 01_coleta.R       # chama scraper.R
+├── 02_limpeza.R      # chama limpeza.R
+└── 03_analise.R
+```
+
+## source() para reutilizar
+
+```{r}
+#| eval: false
+# Em 01_coleta.R:
+source("scripts/utils/scraper.R")
+
+df <- raspar_agencia_brasil(paginas = 0:9)
+```
+
+# Exemplo: Projeto Completo
+
+## Inicializar projeto com usethis
+
+```{r}
+#| eval: false
+install.packages("usethis")
+
+# Criar projeto R
+usethis::create_project("~/projetos/cobertura_ri")
+
+# Iniciar renv
+renv::init()
+
+# Criar estrutura de pastas
+fs::dir_create(c(
+  "data/raw",
+  "data/processed",
+  "scripts/utils",
+  "outputs/figures",
+  "outputs/tables",
+  "docs",
+  "logs"
+))
+
+# Criar .gitignore
+usethis::git_vaccinate()
+```
+
+# Checklist de Reprodutibilidade
+
+## Antes de publicar ou compartilhar
+
+-   [ ] Scripts numerados e nomeados?
+-   [ ] `renv::snapshot()` executado?
+-   [ ] `.Renviron` no `.gitignore`?
+-   [ ] Dados raw preservados sem modificação?
+-   [ ] README explica como re-executar?
+-   [ ] Datas de coleta documentadas?
+-   [ ] Versão do R registrada?
+-   [ ] Fontes e URLs documentadas?
+
+# Exercício
+
+## Organizar projeto existente
+
+Pegue os scripts das aulas anteriores.
+
+Reorganize em estrutura profissional:
+
+1.  Crie as pastas `data/raw`, `data/processed`, `scripts/`, `logs/`;
+2.  Renomeie scripts com numeração e snake_case;
+3.  Mova dados brutos para `data/raw/`;
+4.  Crie `README.md` com descrição do projeto;
+5.  Crie `.gitignore` adequado;
+6.  Inicie `renv` e salve snapshot.
+
+# Próxima Aula
+
+## Pipelines Automatizados com targets
+
+-   o problema da re-execução;
+-   `targets`: dependências declarativas;
+-   pipeline de scraping → limpeza → output;
+-   caching inteligente;
+-   reprodutibilidade garantida.
+
+# Obrigado
+
+## Perguntas?

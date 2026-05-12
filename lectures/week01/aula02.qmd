@@ -1,0 +1,368 @@
+---
+title: "Aula 2"
+subtitle: "Ética, Legalidade e Desenho de Pesquisa"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    slide-number: c/t
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+
+    code-copy: true
+
+    center: false
+    progress: true
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    width: 1600
+    height: 900
+
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+  
+# Aula 2
+  
+## Ética, Legalidade e Desenho de Pesquisa
+  
+# O Problema
+## Só porque podemos coletar dados...
+
+
+# ...não significa que devemos.
+
+  
+# Perguntas Centrais
+  
+## O que torna coleta digital legítima?
+  
+- legalidade;
+- ética;
+- impacto;
+- privacidade;
+- consentimento;
+- carga computacional;
+- validade científica.
+  
+# Web Data ≠ Realidade
+## Dados digitais são produzidos socialmente
+  
+A web possui:
+
+- vieses;
+- exclusões;
+- assimetrias;
+- incentivos institucionais;
+- opacidade algorítmica.
+
+# Exemplo
+  
+## Twitter/X representa opinião pública?
+  
+Problemas:
+  
+- viés demográfico;
+- bots;
+- desigualdade de acesso;
+- comportamento performático;
+- algoritmos.
+
+# Dados Observáveis
+  
+## O que conseguimos ver online?
+  
+Nem tudo é observável.
+Muitos processos políticos deixam:
+  
+- rastros parciais;
+- sinais indiretos;
+- ausência estratégica.
+
+# Exemplo em RI
+  
+## Política Externa Brasileira
+  
+## O que aparece online?
+  
+- discursos;
+- notas oficiais;
+- agendas;
+- tratados;
+- sabatinas;
+- votações.
+
+## O que NÃO aparece?
+  
+- barganhas;
+- vetos internos;
+- negociações privadas.
+  
+# Scraping vs APIs
+  
+  | APIs | Scraping |
+  |---|---|
+  | Estruturado | Não estruturado |
+  | Oficial | Não oficial |
+  | Estável | Frágil |
+  | Documentado | Implícito |
+  | Menor risco | Maior risco |
+
+
+# APIs
+## O que é uma API?
+
+Application Programming Interface
+
+Permite acesso estruturado aos dados
+  
+# Vantagens das APIs
+## APIs geralmente oferecem:
+  
+- estabilidade
+- documentação
+- autenticação
+- limites claros
+- estrutura consistente
+
+# Mas APIs também têm política
+## APIs controlam acesso
+
+Plataformas decidem:
+  
+o que disponibilizar;
+
+- granularidade;
+- limites;
+- preço;
+- historicidade.
+
+# Scraping
+
+Quando scraping é necessário?
+
+- ausência de API;
+- websites institucionais;
+- arquivos históricos;
+- dados legislativos;
+- PDFs;
+- páginas antigas.
+
+
+# O que é robots.txt?
+
+## Um “manual de instruções” para robôs da internet
+
+Quando um site recebe visitantes automáticos
+(como Google, ChatGPT, bots ou scrapers),
+ele pode publicar regras sobre:
+
+- o que pode ser acessado;
+- o que deve ser evitado;
+- quais áreas são privadas.
+
+# Onde ele fica?
+
+Todo site pode ter um arquivo chamado:
+
+https://site.com/robots.txt
+
+# Exemplo
+
+https://www.nytimes.com/robots.txt
+
+# Regras: Exemplos
+
+## User-agent: *  -- Significado: vale para todos os robôs
+## Disallow: /private/ -- Significado não entre na pasta privada
+
+## Não substitui:
+  
+- termos de uso;
+- legislação;
+- ética de pesquisa.
+
+# Termos de Uso
+## Websites podem restringir:
+  
+- scraping automatizado;
+- redistribuição;
+- coleta massiva;
+- uso comercial.
+
+# Questões Éticas
+## Coleta pode causar:
+  
+- sobrecarga do servidor;
+- exposição de usuários;
+- reidentificação;
+- violação de contexto.
+
+# Scraping Ético
+## Boas práticas
+
+- delays;
+- caching;
+- limitar requests;
+- respeitar servidores;
+- evitar coleta desnecessária.
+
+# Privacidade
+## Dados públicos ≠ eticamente neutros
+
+Mesmo dados públicos podem envolver:
+  
+- vulnerabilidade;
+- contexto sensível;
+- risco reputacional.
+  
+# Exemplo
+## Comentários online
+
+Perguntas importantes:
+  
+- usuários esperavam coleta massiva?
+- há risco de exposição?
+- é necessário anonimizar?
+
+# Viés de Seleção
+## Quem aparece na web?
+
+A web super-representa:
+
+- países ricos;
+- atores institucionalizados;
+- plataformas dominantes;
+- grupos conectados.
+  
+# Inferência
+## Coletar dado não é suficiente
+
+Pergunta central: O dado mede o quê?
+  
+Exemplo
+
+Notícias internacionais
+Mais notícias sobre um país significam:
+  
+- mais importância?
+- mais conflito?
+- mais interesse midiático?
+- mais capacidade de cobertura?
+  
+
+# Pesquisa Computacional
+
+O desafio real
+não é apenas coletar.
+
+# É construir inferência válida.
+
+# Pipeline Científico
+
+- pergunta;
+- teoria;
+- coleta;
+- validação;
+- limpeza;
+- análise;
+- interpretação.
+
+# Mini Caso
+RSS do Google News
+``` {r}
+#| eval: false
+library(xml2)
+library(tidyverse)
+
+url <- paste0(
+  "https://news.google.com/rss/search?q=",
+  "ONU",
+  "&hl=pt-BR&gl=BR&ceid=BR:pt-419"
+)
+
+rss <- read_xml(url)
+
+items <- rss |>
+  xml_find_all(".//item")
+
+news <- tibble(
+  title = items |>
+    xml_find_first("title") |>
+    xml_text()
+)
+
+news
+```
+
+# Pergunta Metodológica
+
+O feed do Google News representa:
+  
+- produção jornalística?
+- atenção pública?
+- priorização algorítmica?
+- relevância internacional?
+  
+# O Pesquisador Precisa Decidir
+
+Toda coleta implica escolhas:
+  
+# o que entra;
+# o que fica fora;
+# qual plataforma;
+# qual período;
+# qual idioma.
+
+
+# Transparência
+## Pesquisa reproduzível exige:
+  
+- documentação;
+- scripts;
+- versionamento;
+- explicação metodológica.
+
+
+# Estrutura Recomendada
+
+```text
+project/
+├── data/
+│   ├── raw/
+│   └── processed/
+├── scripts/
+├── outputs/
+└── docs/
+```
+
+
+# Exercício
+Avaliação Ética
+Escolha 3 websites.
+
+Para cada um:
+  
+- existe API?
+- robots.txt?
+- termos de uso?
+- risco ético?
+- coleta justificável?
+
+# Próxima Aula
+
+# HTML, CSS e Estrutura da Web
+- tags;
+- seletores;
+- inspeção;
+- estrutura de páginas.

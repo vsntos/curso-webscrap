@@ -1,0 +1,497 @@
+---
+title: "Aula 3"
+subtitle: "HTML, CSS e Estrutura de Páginas"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## HTML, CSS e Estrutura de Páginas
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# Para Raspar, Precisamos Ler a Web
+
+## A web tem estrutura
+
+Páginas não são texto aleatório.
+
+Elas são documentos organizados com regras precisas:
+
+-   hierarquia;
+-   marcação;
+-   estilo;
+-   semântica.
+
+## Objetivo desta aula
+
+Aprender a **ler HTML como dado**.
+
+# O que é HTML?
+
+## HyperText Markup Language
+
+HTML é a linguagem que descreve o **conteúdo** de uma página.
+
+Não é programação — é **marcação**.
+
+## Estrutura básica
+
+``` html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Título da página</title>
+  </head>
+  <body>
+    <h1>Meu título</h1>
+    <p>Meu parágrafo.</p>
+  </body>
+</html>
+```
+
+# Tags HTML
+
+## O que é uma tag?
+
+Tags são marcadores que delimitam elementos.
+
+``` html
+<p>Este é um parágrafo.</p>
+```
+
+-   `<p>` — abre o elemento;
+-   `</p>` — fecha o elemento;
+-   conteúdo fica **dentro**.
+
+# Tags Mais Comuns
+
+## Estrutura textual
+
+| Tag             | Função    |
+|-----------------|-----------|
+| `<h1>` a `<h6>` | títulos   |
+| `<p>`           | parágrafo |
+| `<a>`           | link      |
+| `<strong>`      | negrito   |
+| `<em>`          | itálico   |
+
+## Estrutura de layout
+
+| Tag         | Função         |
+|-------------|----------------|
+| `<div>`     | bloco genérico |
+| `<span>`    | trecho inline  |
+| `<header>`  | cabeçalho      |
+| `<nav>`     | navegação      |
+| `<article>` | artigo         |
+| `<footer>`  | rodapé         |
+
+## Listas e tabelas
+
+| Tag       | Função             |
+|-----------|--------------------|
+| `<ul>`    | lista não ordenada |
+| `<ol>`    | lista ordenada     |
+| `<li>`    | item de lista      |
+| `<table>` | tabela             |
+| `<tr>`    | linha              |
+| `<td>`    | célula             |
+
+# Atributos HTML
+
+## Atributos dão informação extra
+
+``` html
+<a href="https://itamaraty.gov.br">Itamaraty</a>
+
+<img src="foto.jpg" alt="Descrição">
+
+<div id="conteudo-principal" class="artigo destaque">
+  ...
+</div>
+```
+
+## Atributos mais importantes para scraping
+
+| Atributo | Uso                           |
+|----------|-------------------------------|
+| `id`     | identifica elemento único     |
+| `class`  | identifica grupo de elementos |
+| `href`   | endereço do link              |
+| `src`    | endereço de imagem            |
+| `data-*` | dados customizados            |
+
+# CSS e Seletores
+
+## O que é CSS?
+
+CSS = Cascading Style Sheets
+
+CSS define a **aparência** dos elementos HTML.
+
+Para scraping, CSS nos interessa como **linguagem de seleção**.
+
+## Selecionar elementos é a essência do scraping
+
+```         
+tag         → seleciona por tipo
+.classe     → seleciona por classe
+#id         → seleciona por ID
+```
+
+# Exemplos de Seletores CSS
+
+## Por tag
+
+``` css
+p           /* todos os parágrafos */
+h1          /* todos os títulos h1 */
+a           /* todos os links */
+```
+
+## Por classe
+
+``` css
+.artigo     /* elementos com class="artigo" */
+.destaque   /* elementos com class="destaque" */
+.titulo     /* elementos com class="titulo" */
+```
+
+## Por ID
+
+``` css
+#menu       /* elemento com id="menu" */
+#header     /* elemento com id="header" */
+```
+
+## Combinações
+
+``` css
+div.artigo         /* div com class="artigo" */
+h2.titulo          /* h2 com class="titulo" */
+article p          /* p dentro de article */
+.noticia .data     /* .data dentro de .noticia */
+```
+
+# Inspecionando Páginas
+
+## DevTools do navegador
+
+Todos os navegadores modernos têm ferramentas de inspeção.
+
+Como acessar:
+
+-   `F12`
+-   `Ctrl + Shift + I` (Windows/Linux)
+-   `Cmd + Option + I` (Mac)
+-   clique direito → Inspecionar
+
+## O que procurar?
+
+1.  clicar no elemento que quer raspar;
+2.  identificar a tag;
+3.  identificar `class` e `id`;
+4.  construir o seletor CSS.
+
+# Anatomia de Uma Página de Notícias
+
+## Estrutura típica
+
+``` html
+<article class="noticia">
+  <h2 class="titulo">
+    <a href="/noticia/123">Título da matéria</a>
+  </h2>
+  <span class="data">12 mai 2026</span>
+  <p class="resumo">Primeiro parágrafo da matéria...</p>
+  <span class="fonte">Agência Brasil</span>
+</article>
+```
+
+## O padrão se repete
+
+Listas de notícias repetem a mesma estrutura:
+
+-   um contêiner por item;
+-   classes consistentes;
+-   mesma hierarquia.
+
+Isso é o que torna scraping possível.
+
+# HTML no R
+
+## Lendo HTML com rvest
+
+```{r}
+#| eval: false
+library(rvest)
+
+# Ler uma página
+pagina <- read_html("https://agenciabrasil.ebc.com.br")
+
+# Ver estrutura
+pagina
+```
+
+## Selecionando elementos
+
+```{r}
+#| eval: false
+# Selecionar todos os títulos h2
+titulos <- pagina |>
+  html_elements("h2")
+
+# Selecionar por classe
+artigos <- pagina |>
+  html_elements(".noticia")
+
+# Extrair texto
+texto <- titulos |>
+  html_text2()
+```
+
+# Exemplo Prático
+
+## Lendo HTML local
+
+```{r}
+library(rvest)
+
+# HTML de exemplo
+html_exemplo <- read_html('
+<html>
+<body>
+  <article class="noticia">
+    <h2 class="titulo">ONU debate crise no Oriente Médio</h2>
+    <span class="data">12 mai 2026</span>
+    <p class="resumo">Reunião do Conselho de Segurança discutiu...</p>
+  </article>
+  <article class="noticia">
+    <h2 class="titulo">OTAN amplia presença no Leste Europeu</h2>
+    <span class="data">11 mai 2026</span>
+    <p class="resumo">Aliança anuncia novas bases militares...</p>
+  </article>
+</body>
+</html>
+')
+
+html_exemplo
+```
+
+## Extraindo títulos
+
+```{r}
+titulos <- html_exemplo |>
+  html_elements(".titulo") |>
+  html_text2()
+
+titulos
+```
+
+## Extraindo datas
+
+```{r}
+datas <- html_exemplo |>
+  html_elements(".data") |>
+  html_text2()
+
+datas
+```
+
+## Construindo um dataframe
+
+```{r}
+library(tibble)
+
+df_noticias <- tibble(
+  titulo = titulos,
+  data   = datas
+)
+
+df_noticias
+```
+
+# Extração de Links
+
+## O atributo href
+
+Links guardam o destino no atributo `href`.
+
+```{r}
+html_links <- read_html('
+<ul>
+  <li><a href="https://onu.org/pt/artigo1">Artigo 1</a></li>
+  <li><a href="https://onu.org/pt/artigo2">Artigo 2</a></li>
+</ul>
+')
+
+links <- html_links |>
+  html_elements("a") |>
+  html_attr("href")
+
+links
+```
+
+# Tabelas HTML
+
+## `<table>` é comum em sites institucionais
+
+```{r}
+html_tabela <- read_html('
+<table>
+  <tr><th>País</th><th>Votos</th></tr>
+  <tr><td>Brasil</td><td>10</td></tr>
+  <tr><td>EUA</td><td>15</td></tr>
+  <tr><td>China</td><td>12</td></tr>
+</table>
+')
+
+tabela <- html_tabela |>
+  html_table()
+
+tabela[[1]]
+```
+
+# Hierarquia e Contexto
+
+## Elementos aninhados
+
+```{r}
+html_complexo <- read_html('
+<div class="container">
+  <article class="noticia">
+    <h2>Título</h2>
+    <div class="meta">
+      <span class="autor">João Silva</span>
+      <span class="data">12 mai 2026</span>
+    </div>
+  </article>
+</div>
+')
+
+# Seletor descendente: .noticia .data
+data <- html_complexo |>
+  html_elements(".noticia .data") |>
+  html_text2()
+
+data
+```
+
+# Selecionando o Elemento Certo
+
+## Estratégias
+
+1.  começar pelo elemento mais específico;
+2.  usar `id` quando disponível (únicos);
+3.  combinar tag + classe;
+4.  navegar pela hierarquia;
+5.  testar no navegador antes de codar.
+
+## Verificar no R
+
+```{r}
+#| eval: false
+# Quantos elementos foram encontrados?
+length(html_elements(pagina, ".noticia"))
+
+# Conferir o texto antes de extrair
+html_elements(pagina, ".titulo")[1:3] |>
+  html_text2()
+```
+
+# O que Muda Entre Sites
+
+## Cada site tem sua estrutura
+
+| Site    | Classe típica           |
+|---------|-------------------------|
+| UOL     | `.title`                |
+| G1      | `.feed-post-body-title` |
+| Folha   | `.c-headline__title`    |
+| Reuters | `.article-heading`      |
+| BBC     | `.gs-c-promo-heading`   |
+
+## Por que isso importa?
+
+-   seletores quebram quando sites mudam layout;
+-   precisamos inspecionar antes de raspar;
+-   scripts de scraping têm validade limitada.
+
+# Próximo Passo
+
+## Requests HTTP
+
+Para raspar, precisamos entender como **pedimos** as páginas.
+
+Na próxima aula:
+
+-   GET e POST;
+-   headers e autenticação;
+-   status codes;
+-   httr2 em profundidade.
+
+# Exercício
+
+## Inspeção de páginas de notícias
+
+Escolha 2 portais de notícias internacionais.
+
+Para cada um, identifique:
+
+-   tag do contêiner de cada notícia;
+-   classe do título;
+-   classe da data;
+-   classe do link;
+-   existe `id` útil?
+
+Registre o seletor CSS para cada elemento.
+
+# Próxima Aula
+
+## Requests e Respostas HTTP
+
+-   GET e POST;
+-   status codes;
+-   headers;
+-   httr2;
+-   APIs públicas.
+
+# Obrigado
+
+## Perguntas?

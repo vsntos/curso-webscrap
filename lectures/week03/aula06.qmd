@@ -1,0 +1,380 @@
+---
+title: "Aula 6"
+subtitle: "Estruturando Dados"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Estruturando Dados
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# O Problema
+
+## Scraping produz listas
+
+Dados brutos de scraping chegam como:
+
+- vetores de texto;
+- listas aninhadas;
+- texto sujo;
+- datas inconsistentes.
+
+## Precisamos transformar em datasets
+
+Um dataset científico tem:
+
+- uma linha por observação;
+- uma coluna por variável;
+- tipos corretos;
+- sem duplicatas;
+- sem sujeira.
+
+# Da Coleta ao Dataset
+
+## O pipeline
+
+```
+scraping → lista → tibble → limpeza → normalização → análise
+```
+
+# Listas em R
+
+## Por que listas?
+
+Quando raspamos múltiplas páginas, cada página retorna dados.
+
+O resultado natural é uma **lista de dataframes**.
+
+```{r}
+library(tidyverse)
+
+lista_resultados <- list(
+  tibble(titulo = c("Notícia A", "Notícia B"), data = "2026-05-12"),
+  tibble(titulo = c("Notícia C", "Notícia D"), data = "2026-05-11"),
+  tibble(titulo = c("Notícia E"),               data = "2026-05-10")
+)
+
+lista_resultados
+```
+
+## Combinando com bind_rows()
+
+```{r}
+df_combinado <- bind_rows(lista_resultados)
+
+df_combinado
+```
+
+## Combinando com map_dfr()
+
+```{r}
+#| eval: false
+# purrr::map_dfr() aplica função e une automaticamente
+df_todas_paginas <- purrr::map_dfr(urls, raspar_pagina)
+```
+
+# Limpeza de Texto
+
+## Problemas comuns
+
+```{r}
+textos_brutos <- c(
+  "  \n Diplomacia brasileira \t ",
+  "ONU debate crise\n\n",
+  "China supera EUA    em exportações"
+)
+```
+
+## str_squish() — o mais útil
+
+```{r}
+library(stringr)
+
+str_squish(textos_brutos)
+```
+
+## Outras funções essenciais
+
+```{r}
+x <- "  Líderes do G7 se reúnem em Roma  "
+
+str_trim(x)              # remove bordas
+str_to_lower(x)          # minúsculas
+str_to_upper(x)          # maiúsculas
+str_to_title(x)          # título
+str_remove(x, "do G7 ")  # remove padrão
+```
+
+# Expressões Regulares
+
+## Padrões para limpeza
+
+```{r}
+titulos <- c(
+  "Notícia: OTAN amplia presença",
+  "Breaking: China e EUA negociam acordo",
+  "Exclusivo: Itamaraty divulga nota"
+)
+
+# Remover prefixos padrão
+str_remove(titulos, "^[A-Za-záéíóú]+: ")
+```
+
+## Casos comuns em RI
+
+```{r}
+# Remover numeração
+str_remove("1. Acordo firmado em Genebra", "^\\d+\\.\\s*")
+
+# Extrair ano de uma string
+str_extract("Acordo de 2015 renovado", "\\d{4}")
+
+# Detectar menção a países
+str_detect(
+  c("Brasil negocia com China", "EUA sanciona Irã"),
+  "Brasil|China"
+)
+```
+
+# Normalização de Datas
+
+## Datas chegam em formatos variados
+
+```{r}
+datas_brutas <- c(
+  "12 mai 2026",
+  "2026-05-11",
+  "May 10, 2026",
+  "10/05/2026"
+)
+```
+
+## lubridate facilita o parsing
+
+```{r}
+library(lubridate)
+
+# Formato ISO já funciona direto
+ymd("2026-05-11")
+
+# Formatos mistos
+parse_date_time(
+  c("12 mai 2026", "May 10, 2026"),
+  orders = c("d b Y", "B d, Y"),
+  locale = c("pt_BR", "en_US")
+)
+```
+
+## Formatos mais comuns
+
+| Função | Formato |
+|---|---|
+| `ymd()` | 2026-05-12 |
+| `dmy()` | 12/05/2026 |
+| `mdy()` | 05/12/2026 |
+| `ymd_hms()` | 2026-05-12 14:30:00 |
+
+# Tipos de Dados
+
+## Converter após scraping
+
+```{r}
+df_bruto <- tibble(
+  titulo     = c("Notícia A", "Notícia B"),
+  data_texto = c("2026-05-12", "2026-05-11"),
+  paginas    = c("12", "34"),
+  relevante  = c("sim", "não")
+)
+
+df_tipado <- df_bruto |>
+  mutate(
+    data      = ymd(data_texto),
+    paginas   = as.integer(paginas),
+    relevante = relevante == "sim"
+  ) |>
+  select(-data_texto)
+
+df_tipado
+```
+
+# Deduplicar
+
+## Notícias aparecem em múltiplas páginas
+
+```{r}
+df_com_dup <- tibble(
+  titulo = c("ONU debate", "ONU debate", "OTAN amplia"),
+  link   = c("/a", "/a", "/b")
+)
+
+# Deduplica pelo link (mais confiável que título)
+distinct(df_com_dup, link, .keep_all = TRUE)
+```
+
+# Filtrar Ruído
+
+## Menus, rodapés e outros elementos
+
+```{r}
+df_sujo <- tibble(
+  titulo = c(
+    "Internacional",
+    "ONU aprova resolução histórica",
+    "Leia mais",
+    "China e EUA debatem tarifas",
+    "Compartilhar"
+  )
+)
+
+# Remover textos curtos ou genéricos
+stopwords_ui <- c("Internacional", "Leia mais", "Compartilhar",
+                  "Veja também", "Voltar", "Menu")
+
+df_sujo |>
+  filter(
+    nchar(titulo) > 20,
+    !titulo %in% stopwords_ui
+  )
+```
+
+# Enriquecer o Dataset
+
+## Adicionar colunas derivadas
+
+```{r}
+df_noticias <- tibble(
+  titulo = c(
+    "ONU discute reforma do Conselho de Segurança",
+    "BRICS avança em moeda comum",
+    "COP30 define metas climáticas"
+  ),
+  data = ymd(c("2026-05-12", "2026-05-11", "2026-05-10"))
+)
+
+df_enriquecido <- df_noticias |>
+  mutate(
+    # Componentes de data
+    ano      = year(data),
+    mes      = month(data, label = TRUE),
+    dia_sem  = wday(data, label = TRUE),
+
+    # Tamanho do título
+    n_chars  = nchar(titulo),
+    n_words  = str_count(titulo, "\\S+"),
+
+    # Menção a atores
+    menciona_onu    = str_detect(titulo, regex("ONU|Nações Unidas", ignore_case = TRUE)),
+    menciona_brics  = str_detect(titulo, regex("BRICS", ignore_case = TRUE))
+  )
+
+df_enriquecido
+```
+
+# Pipeline Completo
+
+## Do scraping ao dataset limpo
+
+```{r}
+#| eval: false
+library(rvest)
+library(tidyverse)
+library(lubridate)
+
+# 1. Coletar
+paginas <- paste0(
+  "https://agenciabrasil.ebc.com.br/internacional?page=",
+  0:4
+)
+
+df_bruto <- purrr::map_dfr(paginas, function(url) {
+  Sys.sleep(1.5)
+  pagina <- tryCatch(read_html(url), error = function(e) NULL)
+  if (is.null(pagina)) return(tibble())
+  tibble(
+    titulo = pagina |> html_elements("h2") |> html_text2(),
+    link   = pagina |> html_elements("h2 a") |> html_attr("href"),
+    coletado = Sys.time()
+  )
+})
+
+# 2. Limpar
+df_limpo <- df_bruto |>
+  mutate(titulo = str_squish(titulo)) |>
+  filter(nchar(titulo) > 20) |>
+  distinct(link, .keep_all = TRUE)
+
+# 3. Salvar
+write_csv(df_limpo, "data/processed/noticias_internacionais.csv")
+```
+
+# Exemplo de Dataset Final
+
+## O que um dataset de RI deve ter
+
+| titulo | data | fonte | link | n_words | menciona_onu |
+|---|---|---|---|---|---|
+| ONU discute reforma... | 2026-05-12 | AB | /noticias/... | 6 | TRUE |
+| BRICS avança... | 2026-05-11 | AB | /noticias/... | 4 | FALSE |
+
+# Exercício
+
+## Construir dataset com 100+ observações
+
+1. Escolha um portal;
+2. Raspe pelo menos 5 páginas;
+3. Limpe títulos com `str_squish()`;
+4. Normalize datas com `lubridate`;
+5. Adicione colunas derivadas (ano, mês, n_words);
+6. Deduplicar por link;
+7. Filtre ruído (nchar > 20);
+8. Salve em CSV.
+
+# Próxima Aula
+
+## Paginação e Loops
+
+- loops em R;
+- paginação automática;
+- funções de coleta;
+- escalando para centenas de páginas.
+
+# Obrigado
+
+## Perguntas?

@@ -1,0 +1,391 @@
+---
+title: "Aula 14"
+subtitle: "Aplicações em Relações Internacionais"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Aplicações em Relações Internacionais
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# Conectar Métodos com Teoria
+
+## O objetivo final
+
+Não é coletar dados — é **produzir inferência**.
+
+Toda técnica aprendida serve a uma pergunta teórica.
+
+## Teorias que orientam a análise
+
+- framing (como atores constroem narrativas);
+- agenda-setting (quem define o que é importante);
+- análise de discurso (como posições são articuladas);
+- redes (quem conecta com quem);
+- dependência de trajetória (padrões históricos).
+
+# Framing em Política Internacional
+
+## O que é framing?
+
+A seleção e ênfase de aspectos de uma realidade percebida.
+
+Como um mesmo evento é narrado de formas diferentes?
+
+## Exemplo empírico
+
+```{r}
+library(quanteda)
+library(tidyverse)
+
+titulos <- c(
+  # Portal A: foco em cooperação
+  "Brasil e China ampliam parceria estratégica",
+  "BRICS avança em integração financeira",
+  "América do Sul fortalece soberania econômica",
+  # Portal B: foco em tensão
+  "China expande influência sobre economias emergentes",
+  "Dependência do BRICS do yuan preocupa analistas",
+  "Multipolaridade desafia ordem liberal"
+)
+
+portal <- c(rep("Portal_Sul", 3), rep("Portal_Norte", 3))
+
+corp <- corpus(titulos)
+docvars(corp, "portal") <- portal
+```
+
+## Medindo framing com keyness
+
+```{r}
+dfm_p <- corp |>
+  tokens(remove_punct = TRUE) |>
+  tokens_remove(stopwords("pt")) |>
+  dfm() |>
+  dfm_group(groups = portal)
+
+textstat_keyness(dfm_p, target = "Portal_Sul")
+```
+
+# Agenda-Setting
+
+## O que a mídia prioriza?
+
+```{r}
+noticias <- tibble(
+  titulo = c(
+    "Ucrânia pede mais armamentos à OTAN",
+    "Conflito no Oriente Médio piora",
+    "Brasil sedia cúpula do G20",
+    "Ucrânia resiste ao avanço russo",
+    "Gaza: ONU pede cessar-fogo urgente",
+    "EUA aumentam apoio militar à Ucrânia"
+  ),
+  data = seq.Date(as.Date("2026-05-01"), by = "day", length.out = 6)
+)
+
+# Detectar menção por tema
+noticias |>
+  mutate(
+    ukraine = str_detect(titulo, regex("ucrânia|ukraina", ignore_case = TRUE)),
+    oriente = str_detect(titulo, regex("oriente médio|gaza|israel", ignore_case = TRUE)),
+    brasil  = str_detect(titulo, regex("brasil", ignore_case = TRUE))
+  ) |>
+  pivot_longer(ukraine:brasil, names_to = "tema", values_to = "presente") |>
+  filter(presente) |>
+  count(tema, sort = TRUE)
+```
+
+# Análise de Política Externa
+
+## Discursos do Itamaraty
+
+```{r}
+#| eval: false
+# Raspar notas oficiais do Itamaraty
+url_itamaraty <- "https://www.gov.br/mre/pt-br/canais_atendimento/imprensa/notas-a-imprensa"
+
+pagina <- read_html(url_itamaraty)
+
+notas <- pagina |>
+  html_elements("h3 a") |>
+  html_text2() |>
+  str_squish()
+
+datas <- pagina |>
+  html_elements(".data") |>
+  html_text2()
+
+df_notas <- tibble(nota = notas, data = datas)
+```
+
+## Classificar posição temática
+
+```{r}
+#| eval: false
+dict_posicoes <- dictionary(list(
+  cooperacao   = c("parceria", "acordo", "cooperação", "diálogo"),
+  soberania    = c("soberania", "não intervenção", "autodeterminação"),
+  multilateral = c("onu", "conselho", "assembleia", "tratado"),
+  critica      = c("condenamos", "repudiamos", "inaceitável", "violação")
+))
+
+dfm_notas <- corpus(df_notas, text_field = "nota") |>
+  tokens() |>
+  dfm() |>
+  dfm_lookup(dictionary = dict_posicoes)
+```
+
+# GDELT Project
+
+## A maior base de eventos internacionais
+
+GDELT monitora transmissões de notícias em 100+ idiomas.
+
+Codifica:
+
+- **evento** — tipo de ação (cooperação, conflito, etc.);
+- **atores** — quem fez o quê a quem;
+- **localização** — onde ocorreu;
+- **tom** — positivo ou negativo.
+
+## API do GDELT
+
+```{r}
+library(httr2)
+library(jsonlite)
+
+buscar_gdelt <- function(query, max_records = 25) {
+
+  url <- paste0(
+    "https://api.gdeltproject.org/api/v2/doc/doc",
+    "?query=", URLencode(query),
+    "&mode=artlist",
+    "&maxrecords=", max_records,
+    "&format=json"
+  )
+
+  resp <- tryCatch(
+    request(url) |>
+      req_user_agent("Curso RI / pesquisa academica") |>
+      req_timeout(20) |>
+      req_perform(),
+    error = function(e) NULL
+  )
+
+  if (is.null(resp)) return(tibble())
+
+  dados <- resp |> resp_body_string() |> fromJSON()
+
+  if (is.null(dados$articles)) return(tibble())
+
+  as_tibble(dados$articles)
+}
+```
+
+## Busca no GDELT
+
+```{r}
+df_gdelt <- buscar_gdelt(
+  "Brazil foreign policy diplomacy",
+  max_records = 20
+)
+
+if (nrow(df_gdelt) > 0) {
+  head(df_gdelt[, c("title", "url", "seendate")], 5)
+}
+```
+
+# Séries Temporais de Atenção
+
+## Atenção midiática como variável
+
+```{r}
+#| eval: false
+# Monitorar cobertura por semana
+monitorar_atencao <- function(tema, semanas = 8) {
+
+  datas <- seq.Date(
+    Sys.Date() - weeks(semanas),
+    Sys.Date(),
+    by = "week"
+  )
+
+  map_dfr(datas, function(d) {
+
+    Sys.sleep(1)
+
+    url <- paste0(
+      "https://news.google.com/rss/search?q=",
+      URLencode(tema),
+      "&after=", format(d, "%Y-%m-%d"),
+      "&hl=pt-BR&gl=BR"
+    )
+
+    rss <- tryCatch(xml2::read_xml(url), error = function(e) NULL)
+    if (is.null(rss)) return(tibble())
+
+    n <- length(xml2::xml_find_all(rss, "//item"))
+    tibble(tema = tema, semana = d, n_noticias = n)
+  })
+}
+```
+
+# Análise de Redes
+
+## Quem cita quem? Quem menciona quem?
+
+```{r}
+library(quanteda)
+
+titulos_rede <- c(
+  "EUA e OTAN discutem apoio à Ucrânia",
+  "China e Rússia fortalecem parceria estratégica",
+  "Brasil e China assinam acordo no BRICS",
+  "OTAN e EUA pressionam aliados europeus",
+  "Rússia e Irã coordenam posição na ONU"
+)
+
+# Extrair co-menções de países
+paises <- c("EUA", "OTAN", "China", "Rússia", "Brasil", "Irã", "Ucrânia")
+
+co_mencoes <- map_dfr(titulos_rede, function(t) {
+  presentes <- paises[str_detect(t, paises)]
+  if (length(presentes) < 2) return(tibble())
+  tibble(de = presentes[1], para = presentes[2], titulo = t)
+})
+
+co_mencoes
+```
+
+## Visualizar rede com ggraph
+
+```{r}
+#| eval: false
+library(igraph)
+library(ggraph)
+
+g <- graph_from_data_frame(co_mencoes, directed = FALSE)
+
+ggraph(g, layout = "fr") +
+  geom_edge_link(alpha = 0.5, color = "#666666") +
+  geom_node_point(size = 6, color = "#003366") +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  labs(title = "Rede de co-menções entre atores internacionais") +
+  theme_graph()
+```
+
+# Análise de Posição
+
+## Quem faz o quê com quem
+
+```{r}
+titulos_posicao <- c(
+  "Brasil condena uso de força na Ucrânia",
+  "China apoia proposta de cessar-fogo russo",
+  "EUA rejeitam acordo intermediado pelo Brasil",
+  "BRICS critica sanções do Ocidente",
+  "ONU pede diálogo entre as partes"
+)
+
+dicionario_acao <- dictionary(list(
+  cooperacao = c("apoia", "assina", "parceria", "acordo", "aliança"),
+  critica     = c("critica", "condena", "rejeita", "opõe", "questiona"),
+  neutro      = c("pede", "propõe", "debate", "discute", "negocia")
+))
+
+corpus(titulos_posicao) |>
+  tokens(remove_punct = TRUE) |>
+  tokens_tolower() |>
+  dfm() |>
+  dfm_lookup(dictionary = dicionario_acao) |>
+  convert(to = "data.frame")
+```
+
+# Integração com Dados Estruturados
+
+## Combinar texto com dados quantitativos
+
+```{r}
+#| eval: false
+# Combinar cobertura midiática com dados do Banco Mundial
+library(httr2)
+library(jsonlite)
+
+# PIB (indicador de peso econômico)
+pib <- buscar_indicador("BRA", "NY.GDP.MKTP.CD")
+
+# Menções na mídia (indicador de atenção)
+mencoes <- monitorar_atencao("Brasil política externa")
+
+# Correlação: peso econômico explica atenção midiática?
+left_join(
+  pib |> rename(ano = ano),
+  mencoes |> mutate(ano = year(semana)),
+  by = "ano"
+) |>
+  summarise(cor = cor(pib_trilhoes, n_noticias, use = "complete"))
+```
+
+# Exercício
+
+## Análise de framing em crise internacional
+
+Escolha uma crise atual (Oriente Médio, Ucrânia, etc.).
+
+1. Colete 30+ notícias de dois portais diferentes;
+2. Crie corpus com metadados de portal e data;
+3. Calcule keyness entre portais;
+4. Crie dicionário com 3 frames (ex: humanitário, geopolítico, econômico);
+5. Aplique e compare frames por portal;
+6. Responda: os portais enquadram a crise de formas diferentes?
+
+# Próxima Aula
+
+## Desenvolvimento do Projeto Final
+
+- construir dataset original;
+- documentar coleta;
+- aplicar pipeline completo;
+- preparar para apresentação.
+
+# Obrigado
+
+## Perguntas?

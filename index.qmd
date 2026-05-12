@@ -1,0 +1,95 @@
+---
+title: "Web Scraping e Dados Digitais em RI"
+subtitle: "Métodos computacionais para pesquisa em Relações Internacionais"
+page-layout: full
+---
+
+::: {.hero-banner style="background: linear-gradient(135deg, #003366 0%, #336699 100%); color: white; padding: 4rem 2rem; border-radius: 8px; margin-bottom: 2rem;"}
+## Bem-vindo ao curso
+
+Aprenda a coletar, organizar e analisar dados digitais para pesquisa em RI — de feeds RSS e APIs governamentais a scraping dinâmico, pipelines reprodutíveis e análise de texto com `quanteda`.
+
+[Ver Ementa](syllabus.qmd){.btn .btn-light .me-2}
+[Ver Cronograma](schedule.qmd){.btn .btn-outline-light}
+:::
+
+---
+
+## O que você vai aprender
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+### Coleta de Dados
+
+- HTML, CSS e DevTools
+- Requisições HTTP com `httr2`
+- Scraping estático com `rvest`
+- Scraping dinâmico com `RSelenium` e `chromote`
+- APIs: Banco Mundial, GDELT, ONU Comtrade
+:::
+
+::: {.g-col-12 .g-col-md-4}
+### Infraestrutura
+
+- Organização de projetos reprodutíveis
+- Ambientes com `renv`
+- Pipelines declarativas com `targets`
+- Logging, retry e tratamento de erros
+- Git para projetos de dados
+:::
+
+::: {.g-col-12 .g-col-md-4}
+### Análise
+
+- NLP com `quanteda`
+- Análise de framing e agenda-setting
+- Redes de co-menção com `igraph`
+- Integração dados textuais + econômicos
+- Relatórios automáticos com Quarto
+:::
+
+:::
+
+---
+
+## Estrutura do curso
+
+O curso tem **15 aulas** organizadas em 8 semanas temáticas:
+
+| Semana | Tema | Aulas |
+|--------|------|-------|
+| 1 | Fundamentos — dados digitais em RI, ética | 1–2 |
+| 2 | Web Foundations — HTML, CSS, HTTP, APIs | 3–4 |
+| 3–4 | Scraping Estático — rvest, limpeza, loops, robustez | 5–8 |
+| 5 | Scraping Dinâmico — JavaScript, Selenium | 9–10 |
+| 6 | Infraestrutura — organização, targets | 11–12 |
+| 7 | Texto e NLP — quanteda, framing, redes | 13–14 |
+| 8 | Projeto Final — apresentações | 15 |
+
+---
+
+## Ferramentas
+
+```r
+install.packages(c(
+  "tidyverse", "rvest", "httr2", "jsonlite", "xml2",
+  "RSelenium", "chromote", "targets", "tarchetypes",
+  "quanteda", "quanteda.textstats", "quanteda.textplots",
+  "renv", "fs", "usethis", "lubridate", "purrr"
+))
+```
+
+---
+
+## Avaliação
+
+| Instrumento | Peso |
+|---|---|
+| Exercícios semanais | 20% |
+| Trabalho individual (entrega semana 6) | 30% |
+| Projeto final em grupo | 50% |
+
+---
+
+*PPGRI · 2026 · Vinicius Santos*

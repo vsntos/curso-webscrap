@@ -1,0 +1,475 @@
+---
+title: "Aula 10"
+subtitle: "Automação com Selenium"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Automação com Selenium
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# Quando Nada Mais Funciona
+
+## Selenium é o último recurso
+
+Use Selenium quando:
+
+-   o conteúdo exige JS obrigatório;
+-   há CAPTCHA ou verificação humana;
+-   login é necessário;
+-   a interação envolve cliques e formulários;
+-   scroll infinito não pode ser interceptado.
+
+## O que é Selenium
+
+Framework para **controlar navegadores reais** via código.
+
+O navegador executa JS, carrega cookies, renderiza tudo.
+
+# Arquitetura do RSelenium
+
+## Componentes
+
+```         
+R → RSelenium → WebDriver → Navegador (Chrome/Firefox)
+```
+
+-   **R** — nosso código;
+-   **RSelenium** — pacote que comunica com o WebDriver;
+-   **WebDriver** — protocolo de automação;
+-   **Navegador** — Chrome, Firefox, ou headless.
+
+## Instalação
+
+```{r}
+#| eval: false
+install.packages("RSelenium")
+
+# Chrome: instalar chromedriver compatível
+# https://chromedriver.chromium.org/
+
+# Alternativa com wdman:
+RSelenium::rsDriver(browser = "chrome", chromever = "auto")
+```
+
+# Iniciando uma Sessão
+
+## Conectar ao navegador
+
+```{r}
+#| eval: false
+library(RSelenium)
+
+# Iniciar driver
+driver <- rsDriver(
+  browser    = "chrome",
+  chromever  = "auto",
+  verbose    = FALSE,
+  port       = 4444L
+)
+
+remDr <- driver$client
+
+# Navegar para uma URL
+remDr$navigate("https://agenciabrasil.ebc.com.br/internacional")
+
+# Aguardar carregamento
+Sys.sleep(2)
+```
+
+# Extraindo Conteúdo
+
+## Após renderização completa
+
+```{r}
+#| eval: false
+# Capturar HTML do DOM renderizado
+html_renderizado <- remDr$getPageSource()[[1]]
+
+# Parsear com rvest
+pagina <- read_html(html_renderizado)
+
+# Extrair normalmente
+titulos <- pagina |>
+  html_elements("h2") |>
+  html_text2()
+```
+
+# Selecionando Elementos
+
+## Métodos do Selenium
+
+```{r}
+#| eval: false
+# Por CSS selector
+elemento <- remDr$findElement(
+  using = "css selector",
+  value = ".botao-busca"
+)
+
+# Por XPath
+elemento <- remDr$findElement(
+  using = "xpath",
+  value = "//button[@type='submit']"
+)
+
+# Por texto do link
+elemento <- remDr$findElement(
+  using = "link text",
+  value = "Próxima página"
+)
+
+# Múltiplos elementos
+lista <- remDr$findElements(
+  using = "css selector",
+  value = ".noticia"
+)
+```
+
+# Interações
+
+## Clicar
+
+```{r}
+#| eval: false
+botao <- remDr$findElement("css selector", "#btn-busca")
+botao$clickElement()
+
+Sys.sleep(1)  # aguardar resposta
+```
+
+## Digitar texto
+
+```{r}
+#| eval: false
+campo <- remDr$findElement("css selector", "input[name='q']")
+campo$clearElement()
+campo$sendKeysToElement(list("diplomacia Brasil OTAN"))
+
+# Submeter
+campo$sendKeysToElement(list(key = "enter"))
+
+Sys.sleep(2)
+```
+
+## Scroll
+
+```{r}
+#| eval: false
+# Scrollar até o fim
+remDr$executeScript("window.scrollTo(0, document.body.scrollHeight);")
+
+# Scrollar para um elemento
+remDr$executeScript(
+  "arguments[0].scrollIntoView(true);",
+  list(elemento)
+)
+```
+
+# Login Automatizado
+
+## Fluxo típico
+
+```{r}
+#| eval: false
+# 1. Navegar para login
+remDr$navigate("https://portal.gov.br/login")
+Sys.sleep(2)
+
+# 2. Preencher usuário
+campo_user <- remDr$findElement("css selector", "#usuario")
+campo_user$sendKeysToElement(list(Sys.getenv("PORTAL_USER")))
+
+# 3. Preencher senha
+campo_senha <- remDr$findElement("css selector", "#senha")
+campo_senha$sendKeysToElement(list(Sys.getenv("PORTAL_SENHA")))
+
+# 4. Clicar em entrar
+remDr$findElement("css selector", "button[type='submit']") |>
+  (\(x) x$clickElement())()
+
+Sys.sleep(3)  # aguardar redirecionamento
+```
+
+# Scroll Infinito
+
+## Padrão de coleta
+
+```{r}
+#| eval: false
+coletar_com_scroll <- function(url, n_scrolls = 10) {
+
+  remDr$navigate(url)
+  Sys.sleep(3)
+
+  todos_titulos <- character(0)
+
+  for (i in seq_len(n_scrolls)) {
+
+    html_atual <- remDr$getPageSource()[[1]]
+    pagina <- read_html(html_atual)
+
+    titulos <- pagina |>
+      html_elements(".titulo") |>
+      html_text2()
+
+    novos <- setdiff(titulos, todos_titulos)
+    todos_titulos <- unique(c(todos_titulos, titulos))
+
+    cat(sprintf("Scroll %d: +%d títulos (%d total)\n",
+                i, length(novos), length(todos_titulos)))
+
+    # Scrollar
+    remDr$executeScript(
+      "window.scrollTo(0, document.body.scrollHeight);"
+    )
+    Sys.sleep(2)
+
+    if (length(novos) == 0) {
+      cat("Sem novos elementos — encerrando.\n")
+      break
+    }
+  }
+
+  todos_titulos
+}
+```
+
+# Navegação Entre Páginas
+
+## Clicar em "próxima página"
+
+```{r}
+#| eval: false
+coletar_multiplas_paginas <- function(url, max_paginas = 20) {
+
+  remDr$navigate(url)
+  Sys.sleep(2)
+
+  resultados <- list()
+
+  for (p in seq_len(max_paginas)) {
+
+    # Extrair dados da página atual
+    html <- remDr$getPageSource()[[1]]
+    dados <- extrair_dados(read_html(html))
+    resultados[[p]] <- dados
+
+    cat(sprintf("Página %d: %d itens\n", p, nrow(dados)))
+
+    # Procurar botão de próxima página
+    proxima <- tryCatch(
+      remDr$findElement("css selector", "a[rel='next'], .proxima-pagina"),
+      error = function(e) NULL
+    )
+
+    if (is.null(proxima)) {
+      cat("Última página.\n")
+      break
+    }
+
+    proxima$clickElement()
+    Sys.sleep(2)
+  }
+
+  bind_rows(resultados)
+}
+```
+
+# Aguardar Elementos
+
+## Espera explícita
+
+```{r}
+#| eval: false
+aguardar_elemento <- function(remDr, seletor, timeout = 10) {
+
+  inicio <- Sys.time()
+
+  repeat {
+    elemento <- tryCatch(
+      remDr$findElement("css selector", seletor),
+      error = function(e) NULL
+    )
+
+    if (!is.null(elemento)) return(elemento)
+
+    if (as.numeric(Sys.time() - inicio) > timeout) {
+      stop(sprintf("Timeout: elemento '%s' não apareceu.", seletor))
+    }
+
+    Sys.sleep(0.5)
+  }
+}
+```
+
+# Capturar Screenshot
+
+## Documentar o scraping
+
+```{r}
+#| eval: false
+# Tirar screenshot para documentação / debug
+remDr$screenshot(file = "screenshots/pagina_login.png")
+```
+
+# Encerrar a Sessão
+
+## Sempre fechar o driver
+
+```{r}
+#| eval: false
+# Fechar o navegador
+remDr$close()
+
+# Parar o servidor
+driver$server$stop()
+```
+
+## Usar on.exit() para garantir
+
+```{r}
+#| eval: false
+scraper_selenium <- function(url) {
+
+  driver <- rsDriver(browser = "chrome", verbose = FALSE)
+  remDr  <- driver$client
+
+  on.exit({
+    remDr$close()
+    driver$server$stop()
+  })
+
+  # ... scraping ...
+}
+```
+
+# Exemplo Completo: Portal Legislativo
+
+## Câmara dos Deputados — votações
+
+```{r}
+#| eval: false
+coletar_votacoes_camara <- function(legislatura = 57) {
+
+  driver <- rsDriver(browser = "chrome", verbose = FALSE, port = 4445L)
+  remDr  <- driver$client
+  on.exit({ remDr$close(); driver$server$stop() })
+
+  url <- paste0(
+    "https://www.camara.leg.br/votacoes#",
+    "legislatura=", legislatura
+  )
+
+  remDr$navigate(url)
+  Sys.sleep(4)
+
+  resultados <- list()
+
+  for (p in 1:5) {
+
+    html <- remDr$getPageSource()[[1]]
+    pagina <- read_html(html)
+
+    votos <- pagina |>
+      html_elements(".pauta-votacao") |>
+      html_text2()
+
+    if (length(votos) > 0) {
+      resultados[[p]] <- tibble(votacao = votos, pagina = p)
+    }
+
+    # Próxima página
+    btn_prox <- tryCatch(
+      remDr$findElement("css selector", ".paginacao-proxima"),
+      error = function(e) NULL
+    )
+
+    if (is.null(btn_prox)) break
+
+    btn_prox$clickElement()
+    Sys.sleep(2)
+  }
+
+  bind_rows(resultados)
+}
+```
+
+# Boas Práticas com Selenium
+
+## Respeitar o servidor
+
+-   delays entre ações (`Sys.sleep`);
+-   simular comportamento humano;
+-   não raspar em paralelo agressivo;
+-   verificar robots.txt.
+
+## Performance
+
+-   preferir headless quando não precisa ver;
+-   fechar sessão sempre que terminar;
+-   não abrir múltiplos drivers desnecessariamente.
+
+# Exercício
+
+## Automatizar navegação com RSelenium
+
+Escolha um portal legislativo ou governamental.
+
+1.  Instale RSelenium e configure o Chrome;
+2.  Navegue para a URL alvo;
+3.  Extraia o HTML após renderização;
+4.  Raspe dados de pelo menos 3 páginas clicando em "próxima";
+5.  Salve em CSV;
+6.  Feche o driver com `on.exit()`.
+
+# Próxima Aula
+
+## Organização de Projetos
+
+-   estrutura de pastas;
+-   naming conventions;
+-   separação raw / processed;
+-   documentação;
+-   pensar como pesquisador, não só programador.
+
+# Obrigado
+
+## Perguntas?

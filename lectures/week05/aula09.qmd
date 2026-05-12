@@ -1,0 +1,331 @@
+---
+title: "Aula 9"
+subtitle: "JavaScript e Conteúdo Dinâmico"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## JavaScript e Conteúdo Dinâmico
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# O Limite do Scraping Estático
+
+## rvest funciona bem quando
+
+-   o HTML já contém os dados;
+-   a página é gerada no servidor;
+-   não há carregamento assíncrono.
+
+## rvest falha quando
+
+-   o conteúdo é renderizado por JavaScript;
+-   dados carregam após a página;
+-   há scroll infinito;
+-   login é necessário;
+-   há interações obrigatórias.
+
+# A Web Moderna
+
+## Como páginas dinâmicas funcionam
+
+1.  servidor envia HTML "esqueleto";
+2.  navegador carrega JavaScript;
+3.  JS faz requisições adicionais (AJAX/Fetch);
+4.  dados chegam em JSON;
+5.  JS injeta o conteúdo no DOM.
+
+## O que read_html() captura
+
+Apenas o **HTML inicial** — antes do JS rodar.
+
+O DOM final (com dados) fica invisível.
+
+# Identificar Conteúdo Dinâmico
+
+## Sintoma claro
+
+```{r}
+#| eval: false
+library(rvest)
+
+pagina <- read_html("https://site-dinamico.com")
+
+# Retorna character(0) — mas no navegador tem conteúdo
+pagina |> html_elements(".noticia") |> html_text2()
+```
+
+## Como diagnosticar
+
+1.  Abrir no navegador — dados aparecem?
+2.  `read_html()` no R — dados aparecem?
+3.  Se SIM no navegador e NÃO no R → dinâmico.
+
+# Inspeção de Rede: DevTools
+
+## Aba Network
+
+`F12` → **Network** → recarregar página
+
+Filtros úteis:
+
+-   **XHR** — requisições AJAX assíncronas;
+-   **Fetch** — API calls modernas;
+-   **JS** — scripts carregados.
+
+## O que procurar
+
+-   requisições para `/api/`, `/data/`, `/json/`;
+-   respostas com Content-Type `application/json`;
+-   payloads com os dados que você quer.
+
+# APIs Ocultas
+
+## Muitos sites têm APIs não documentadas
+
+O aplicativo web consome uma API interna.
+
+Podemos consumir a mesma API com R.
+
+## Exemplo: site com API oculta
+
+```         
+GET https://portal.com/api/v1/noticias?categoria=internacional&page=1
+→ Content-Type: application/json
+→ [{"id": 1, "titulo": "...", "data": "..."}]
+```
+
+## Vantagem
+
+-   JSON estruturado;
+-   mais estável que HTML;
+-   sem necessidade de Selenium.
+
+# Exemplo: Inspecionando uma API
+
+## Passo a passo
+
+```{r}
+#| eval: false
+# 1. Identificar a URL da API no Network
+url_api <- "https://portal.com/api/noticias?page=1&format=json"
+
+# 2. Replicar a requisição com httr2
+library(httr2)
+library(jsonlite)
+
+resp <- request(url_api) |>
+  req_headers(
+    `Accept`          = "application/json",
+    `X-Requested-With` = "XMLHttpRequest",
+    `Referer`         = "https://portal.com/noticias"
+  ) |>
+  req_user_agent("Pesquisa acadêmica") |>
+  req_perform()
+
+# 3. Extrair JSON
+dados <- resp |> resp_body_json()
+
+# 4. Converter para dataframe
+df <- map_dfr(dados$items, ~tibble(
+  titulo = .x$titulo,
+  data   = .x$data,
+  link   = .x$url
+))
+```
+
+# Copiando Requisições do DevTools
+
+## Export as cURL
+
+No DevTools, clique com botão direito na requisição:
+
+**Copy → Copy as cURL**
+
+## Converter para R
+
+``` bash
+# cURL exportado:
+curl 'https://api.portal.com/noticias' \
+  -H 'Authorization: Bearer token123' \
+  -H 'Accept: application/json'
+```
+
+```{r}
+#| eval: false
+# Equivalente em R:
+resp <- request("https://api.portal.com/noticias") |>
+  req_headers(
+    Authorization = "Bearer token123",
+    Accept        = "application/json"
+  ) |>
+  req_perform()
+```
+
+# Headers Importantes para APIs Ocultas
+
+## O servidor pode checar
+
+| Header             | Papel                     |
+|--------------------|---------------------------|
+| `Referer`          | de onde vem a requisição  |
+| `X-Requested-With` | indica AJAX               |
+| `Accept`           | tipo de resposta esperada |
+| `Cookie`           | sessão autenticada        |
+| `Authorization`    | token de acesso           |
+
+# Quando Não Há API Oculta
+
+## Opções
+
+1.  **RSelenium** — controlar navegador real (Aula 10);
+2.  **Chromote** — protocolo Chrome DevTools em R;
+3.  **Splash** — servidor de renderização leve;
+4.  **Playwright via reticulate** — Python + R.
+
+## Hierarquia de decisão
+
+```         
+API pública disponível?    → usar API
+API oculta acessível?      → replicar com httr2
+Conteúdo estático?         → rvest
+Conteúdo dinâmico?         → RSelenium
+```
+
+# Chromote: Alternativa Leve
+
+## Protocolo Chrome DevTools
+
+```{r}
+#| eval: false
+library(chromote)
+
+# Iniciar sessão Chrome headless
+b <- ChromoteSession$new()
+
+# Navegar
+b$Page$navigate("https://site-dinamico.com")
+
+# Aguardar JS renderizar
+Sys.sleep(3)
+
+# Capturar HTML após renderização
+html_final <- b$Runtime$evaluate(
+  "document.documentElement.outerHTML"
+)$result$value
+
+# Parsear com rvest
+pagina <- read_html(html_final)
+
+pagina |> html_elements(".noticia") |> html_text2()
+
+b$close()
+```
+
+# Exemplos em RI
+
+## Sites com conteúdo dinâmico relevantes
+
+| Site                        | Tipo             |
+|-----------------------------|------------------|
+| Portal da Câmara (votações) | API interna JSON |
+| SIPRI Databases             | tabelas JS       |
+| Global Incident Map         | WebSocket        |
+| Legislativos estaduais      | JS variado       |
+| Portais de licitações       | AJAX             |
+
+## GDELT em tempo real
+
+```{r}
+#| eval: false
+# GDELT tem API pública documentada
+url_gdelt <- paste0(
+  "https://api.gdeltproject.org/api/v2/doc/doc",
+  "?query=Brazil+diplomacy",
+  "&mode=artlist&maxrecords=25&format=json"
+)
+
+dados_gdelt <- request(url_gdelt) |>
+  req_perform() |>
+  resp_body_json()
+```
+
+# Limites Éticos do Scraping Dinâmico
+
+## Atenção redobrada
+
+-   APIs ocultas podem ter termos de uso;
+-   autenticação implica consentimento de usuário;
+-   dados pessoais em APIs internas são sensíveis;
+-   uso de tokens de sessão é tecnicamente invasivo.
+
+## Regra geral
+
+Se você precisaria de login para ver os dados,
+
+você precisaria de autorização para coletá-los.
+
+# Exercício
+
+## Identificar APIs ocultas
+
+Escolha 2 portais com conteúdo dinâmico.
+
+Para cada um:
+
+1.  Abra o DevTools → Network;
+2.  Filtre por XHR/Fetch;
+3.  Identifique chamadas de API;
+4.  Copie a URL e headers;
+5.  Tente replicar com httr2;
+6.  Reporte: funcionou? Qual estrutura do JSON?
+
+# Próxima Aula
+
+## Automação com Selenium
+
+-   quando não há alternativa;
+-   RSelenium: instalar e configurar;
+-   navegar, clicar, scrollar;
+-   extrair conteúdo renderizado;
+-   login e interações complexas.
+
+# Obrigado
+
+## Perguntas?

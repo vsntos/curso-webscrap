@@ -1,0 +1,147 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "Web Scraping e Dados Digitais em RI"
+  description: "Métodos computacionais para coleta e análise de dados aplicados às Relações Internacionais"
+
+  navbar:
+    background: dark
+    search: true
+    left:
+      - href: index.qmd
+        text: Home
+      - href: syllabus.qmd
+        text: Ementa
+      - href: schedule.qmd
+        text: Cronograma
+
+      - text: "Semana 1 · Fundamentos"
+        menu:
+          - href: lectures/week01/aula01.qmd
+            text: "Aula 1 — Dados Digitais em RI"
+          - href: lectures/week01/aula02.qmd
+            text: "Aula 2 — Ética e Legalidade"
+
+      - text: "Semana 2 · Web Foundations"
+        menu:
+          - href: lectures/week02/aula03.qmd
+            text: "Aula 3 — HTML e CSS"
+          - href: lectures/week02/aula04.qmd
+            text: "Aula 4 — Requests HTTP"
+
+      - text: "Semanas 3–4 · Scraping Estático"
+        menu:
+          - href: lectures/week03/aula05.qmd
+            text: "Aula 5 — Introdução ao rvest"
+          - href: lectures/week03/aula06.qmd
+            text: "Aula 6 — Estruturando Dados"
+          - href: lectures/week04/aula07.qmd
+            text: "Aula 7 — Paginação e Loops"
+          - href: lectures/week04/aula08.qmd
+            text: "Aula 8 — Robustez e Erros"
+
+      - text: "Semana 5 · Scraping Dinâmico"
+        menu:
+          - href: lectures/week05/aula09.qmd
+            text: "Aula 9 — JavaScript e Conteúdo Dinâmico"
+          - href: lectures/week05/aula10.qmd
+            text: "Aula 10 — Automação com Selenium"
+
+      - text: "Semana 6 · Pipelines"
+        menu:
+          - href: lectures/week06/aula11.qmd
+            text: "Aula 11 — Organização de Projetos"
+          - href: lectures/week06/aula12.qmd
+            text: "Aula 12 — Pipelines com targets"
+
+      - text: "Semana 7 · Texto e NLP"
+        menu:
+          - href: lectures/week07/aula13.qmd
+            text: "Aula 13 — NLP com quanteda"
+          - href: lectures/week07/aula14.qmd
+            text: "Aula 14 — Aplicações em RI"
+
+      - text: "Semana 8 · Projeto"
+        menu:
+          - href: lectures/week08/aula15.qmd
+            text: "Aula 15 — Projeto Final"
+
+      - text: Scripts
+        menu:
+          - text: "Aula 1 — RSS Google News"
+            href: scripts/aula01_rss_google_news.R
+          - text: "Aula 2 — APIs Banco Mundial"
+            href: scripts/aula02_apis_banco_mundial.R
+          - text: "Aula 3 — HTML e CSS"
+            href: scripts/aula03_html_css_estrutura.R
+          - text: "Aula 4 — Requests HTTP"
+            href: scripts/aula04_requests_http.R
+          - text: "Aula 5 — rvest"
+            href: scripts/aula05_scraping_rvest.R
+          - text: "Aula 6 — Estruturando Dados"
+            href: scripts/aula06_estruturando_dados.R
+          - text: "Aula 7 — Paginação"
+            href: scripts/aula07_paginacao_loops.R
+          - text: "Aula 8 — Robustez"
+            href: scripts/aula08_robustez_erros.R
+          - text: "Aula 9 — JavaScript"
+            href: scripts/aula09_javascript_dinamico.R
+          - text: "Aula 10 — Selenium"
+            href: scripts/aula10_selenium_automacao.R
+          - text: "Aula 11 — Organização"
+            href: scripts/aula11_organizacao_projetos.R
+          - text: "Aula 12 — targets"
+            href: scripts/aula12_pipelines_targets.R
+          - text: "Aula 13 — NLP"
+            href: scripts/aula13_nlp_quanteda.R
+          - text: "Aula 14 — Aplicações RI"
+            href: scripts/aula14_aplicacoes_ri.R
+          - text: "Aula 15 — Template Final"
+            href: scripts/aula15_projeto_final_template.R
+
+    right:
+      - icon: github
+        href: https://github.com
+
+  page-footer:
+    left: "© 2026 Vinicius Santos · PPGRI"
+    center: "Web Scraping e Dados Digitais em RI"
+
+format:
+  html:
+    theme:
+      light: [flatly, assets/custom.scss]
+      dark: [darkly, assets/custom.scss]
+    toc: true
+    toc-depth: 3
+    code-copy: true
+    code-overflow: wrap
+    highlight-style: github
+    df-print: paged
+
+  revealjs:
+    theme: [simple, assets/custom.scss]
+    width: 1600
+    height: 900
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+    transition: fade
+    background-transition: fade
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+    center: false
+    footer: "Web Scraping e Dados Digitais em RI"
+    highlight-style: github
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false
+
+editor: visual

@@ -1,0 +1,383 @@
+---
+title: "Aula 15"
+subtitle: "Desenvolvimento do Projeto Final"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Desenvolvimento do Projeto Final
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# O que é o Projeto Final
+
+## Construir um dataset original
+
+Um projeto de pesquisa completo que envolve:
+
+-   pergunta de pesquisa clara;
+-   coleta de dados originais;
+-   limpeza e documentação;
+-   análise substantiva;
+-   interpretação teórica.
+
+## O que não é
+
+-   reprodução de análise já publicada;
+-   download de dados prontos;
+-   análise sem pergunta teórica.
+
+# Estrutura do Projeto
+
+## Cinco etapas obrigatórias
+
+1.  **Pergunta** — o que você quer saber?
+2.  **Coleta** — de onde e como?
+3.  **Limpeza** — o dado está pronto para análise?
+4.  **Análise** — o que os dados mostram?
+5.  **Interpretação** — o que isso significa para RI?
+
+# Etapa 1: Pergunta de Pesquisa
+
+## Uma boa pergunta de pesquisa
+
+-   é específica (não "como funciona a diplomacia");
+-   é empírica (pode ser respondida com dados);
+-   tem variação (há diferença a ser explicada);
+-   tem relevância teórica (conecta com literatura).
+
+## Exemplos
+
+-   Como a cobertura brasileira do conflito ucraniano difere da cobertura europeia?
+-   Sanções econômicas afetaram as exportações russas pós-2022?
+-   Quais temas dominam os discursos do Itamaraty no G20?
+-   A presença do Brasil nos fóruns multilaterais cresceu após 2023?
+
+# Etapa 2: Fontes de Dados
+
+## Mapear antes de coletar
+
+| Fonte          | Tipo        | Acesso   |
+|----------------|-------------|----------|
+| Agência Brasil | HTML        | scraping |
+| BBC Português  | HTML        | scraping |
+| Banco Mundial  | API pública | httr2    |
+| GDELT Project  | API pública | httr2    |
+| Itamaraty      | HTML        | scraping |
+| Câmara/Senado  | API pública | httr2    |
+| Google News    | RSS         | xml2     |
+
+## Critérios de escolha
+
+-   robôs.txt permite scraping?
+-   há API disponível (prefira)?
+-   qual período coberto?
+-   qual idioma?
+-   qual granularidade?
+
+# Etapa 3: Coleta
+
+## Princípios
+
+```{r}
+#| eval: false
+# 1. Sempre verificar robots.txt
+# 2. Sempre usar delay
+# 3. Sempre identificar o scraper
+# 4. Sempre salvar raw antes de processar
+# 5. Sempre registrar metadados de coleta
+```
+
+## Estrutura de coleta
+
+```{r}
+#| eval: false
+source("scripts/utils/scraper.R")
+
+df_raw <- coletar_corpus(
+  portal      = "Agência Brasil",
+  url_base    = "https://agenciabrasil.ebc.com.br/internacional?page=",
+  n_paginas   = 20,
+  delay       = 1.5
+)
+
+# Salvar imediatamente
+write_csv(df_raw, paste0(
+  "data/raw/agencia_brasil_",
+  format(Sys.Date(), "%Y%m%d"),
+  ".csv"
+))
+```
+
+# Etapa 4: Limpeza
+
+## Checklist de limpeza
+
+-   [ ] Textos limpos com `str_squish()`?
+-   [ ] Datas em formato Date?
+-   [ ] Duplicatas removidas?
+-   [ ] Ruído filtrado (nchar \> 20)?
+-   [ ] Colunas tipadas corretamente?
+-   [ ] Metadados preservados?
+-   [ ] Tamanho razoável?
+
+## Pipeline de limpeza
+
+```{r}
+#| eval: false
+df_limpo <- df_raw |>
+  mutate(
+    titulo    = str_squish(titulo),
+    data      = lubridate::ymd(data_coleta),
+    n_words   = stringr::str_count(titulo, "\\S+")
+  ) |>
+  filter(
+    nchar(titulo) > 20,
+    !is.na(data)
+  ) |>
+  distinct(link, .keep_all = TRUE)
+```
+
+# Etapa 5: Análise
+
+## O mínimo esperado
+
+-   estatísticas descritivas do corpus;
+-   frequência de palavras-chave;
+-   variação por portal / período;
+-   pelo menos uma análise temática ou de framing.
+
+## O que surpreende
+
+-   descobertas contra-intuitivas;
+-   padrões que a teoria não previa;
+-   diferenças entre fontes;
+-   mudanças ao longo do tempo.
+
+# Documentação Metodológica
+
+## Seção de metodologia
+
+``` markdown
+## Metodologia de Coleta
+
+**Fonte**: Agência Brasil (agenciabrasil.ebc.com.br)
+**Seção**: Internacional
+**Período**: 01/jan/2025 a 31/dez/2025
+**Método**: scraping HTML com rvest
+**Frequência de acesso**: 1 requisição a cada 1.5s
+**robots.txt verificado**: sim (acesso permitido)
+**Total de páginas raspadas**: 50
+**Observações coletadas (raw)**: 847
+**Observações após limpeza**: 712
+
+**Script de coleta**: scripts/01_coleta.R
+**Data de execução**: 2026-05-12
+**Versão do R**: 4.4.0
+```
+
+# Validação do Dataset
+
+## Verificações obrigatórias
+
+```{r}
+#| eval: false
+# Verificar integridade
+summary(df_limpo)
+vis_dat(df_limpo)        # pacote visdat
+
+# Verificar ausentes
+colSums(is.na(df_limpo))
+
+# Verificar duplicatas
+df_limpo |>
+  add_count(link) |>
+  filter(n > 1)
+
+# Verificar distribuição temporal
+df_limpo |>
+  count(mes = floor_date(data, "month")) |>
+  ggplot(aes(mes, n)) + geom_col()
+```
+
+# Pipeline Final com targets
+
+## \_targets.R do projeto
+
+```{r}
+#| eval: false
+library(targets)
+library(tarchetypes)
+
+source("scripts/utils/scraper.R")
+source("scripts/utils/limpeza.R")
+source("scripts/utils/nlp.R")
+source("scripts/utils/analise.R")
+
+list(
+  # Coleta
+  tar_target(raw_agencia, coletar_agencia(0:19)),
+  tar_target(raw_onu,     coletar_onu(0:9)),
+
+  # Integração
+  tar_target(corpus_bruto, bind_rows(raw_agencia, raw_onu)),
+
+  # Limpeza
+  tar_target(corpus_limpo, limpar_corpus(corpus_bruto)),
+
+  # NLP
+  tar_target(dfm_corp, construir_dfm(corpus_limpo)),
+  tar_target(keyness,  calcular_keyness(dfm_corp)),
+  tar_target(frames,   aplicar_frames(dfm_corp)),
+
+  # Outputs
+  tar_target(fig_freq,    plotar_frequencia(dfm_corp), format = "file"),
+  tar_target(fig_keyness, plotar_keyness(keyness),    format = "file"),
+  tar_target(tab_frames,  exportar_tabela(frames),    format = "file"),
+
+  # Relatório
+  tar_quarto(relatorio, "docs/relatorio_final.qmd")
+)
+```
+
+# Entregável Final
+
+## O que entregar
+
+1.  **Repositório organizado** com estrutura padrão;
+2.  \*\*\_targets.R\*\* com pipeline completo;
+3.  **README.md** documentando o projeto;
+4.  **Relatório** (Quarto) com:
+    -   pergunta de pesquisa;
+    -   metodologia de coleta;
+    -   análise descritiva;
+    -   análise temática/framing;
+    -   interpretação teórica;
+    -   limitações;
+5.  **Dataset** em `data/processed/`.
+
+# Limitações e Validade
+
+## Seção obrigatória
+
+Todo projeto deve discutir:
+
+-   **viés de seleção** — o dado representa o quê?
+-   **validade de medida** — o indicador mede o conceito?
+-   **temporalidade** — quando foi coletado?
+-   **representatividade** — qual universo?
+-   **fragmentação** — o que não conseguimos capturar?
+
+# Perguntas para Guiar o Projeto
+
+## Checklist final
+
+-   [ ] A pergunta é empírica e específica?
+-   [ ] A fonte é acessível e permitida?
+-   [ ] O dataset tem volume suficiente (100+)?
+-   [ ] O pipeline é reproduzível?
+-   [ ] A análise conecta com teoria de RI?
+-   [ ] As limitações estão documentadas?
+-   [ ] O README explica como re-executar?
+
+# Cronograma
+
+## Desenvolvimento em sala
+
+| Atividade                | Prazo           |
+|--------------------------|-----------------|
+| Definir pergunta e fonte | Esta semana     |
+| Coleta e limpeza         | Semana seguinte |
+| Análise                  | +1 semana       |
+| Relatório final          | +1 semana       |
+
+# O que Aprendemos neste Curso
+
+## Módulo I — Fundamentos
+
+-   dados digitais em RI;
+-   ética e legalidade;
+-   HTML, CSS, HTTP.
+
+## Módulo II — Scraping
+
+-   rvest;
+-   paginação;
+-   robustez;
+-   JavaScript e Selenium.
+
+## Módulo III — Pipelines
+
+-   organização;
+-   targets;
+-   reprodutibilidade.
+
+## Módulo IV — Análise
+
+-   quanteda;
+-   framing e keyness;
+-   GDELT;
+-   redes de atores.
+
+# Uma Última Reflexão
+
+## Pesquisar é construir infraestrutura de dados
+
+A pesquisa computacional em RI exige:
+
+-   coleta sistemática;
+-   estruturação rigorosa;
+-   análise válida;
+-   interpretação teórica;
+-   transparência metodológica.
+
+## Você agora tem as ferramentas
+
+O resto é pergunta e criatividade.
+
+# Obrigado
+
+## Boa sorte no projeto!
+
+Dúvidas e questões:
+
+-   abrir issue no repositório do curso;
+-   ou enviar por e-mail.
+
+# Sucesso!

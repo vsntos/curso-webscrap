@@ -1,0 +1,405 @@
+---
+title: "Aula 7"
+subtitle: "Paginação e Loops"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Paginação e Loops
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# O Problema de Escala
+
+## Uma página não é suficiente
+
+Para pesquisa científica precisamos de volume:
+
+- dezenas de páginas;
+- centenas de notícias;
+- meses de cobertura;
+- múltiplos portais.
+
+## A solução: automatizar a navegação
+
+Loops e paginação nos permitem raspar em escala.
+
+# Tipos de Paginação
+
+## Padrão de URL numérica
+
+```
+https://portal.com/noticias?page=1
+https://portal.com/noticias?page=2
+https://portal.com/noticias?page=3
+```
+
+## Padrão de offset
+
+```
+https://portal.com/noticias?start=0
+https://portal.com/noticias?start=20
+https://portal.com/noticias?start=40
+```
+
+## Padrão de cursor / token
+
+```
+https://portal.com/noticias?cursor=abc123
+```
+
+(Comum em APIs — o próximo cursor vem na resposta)
+
+## Link "próxima página"
+
+Alguns sites têm um link `<a rel="next">` no HTML.
+
+# Loop for em R
+
+## Estrutura básica
+
+```{r}
+paginas <- 1:5
+
+for (p in paginas) {
+  cat("Raspando página:", p, "\n")
+}
+```
+
+## Loop de scraping
+
+```{r}
+#| eval: false
+resultados <- list()
+
+for (p in 1:10) {
+
+  url <- paste0("https://portal.com/noticias?page=", p)
+
+  pagina <- read_html(url)
+
+  resultados[[p]] <- extrair_dados(pagina)
+
+  Sys.sleep(1.5)
+}
+
+df <- bind_rows(resultados)
+```
+
+# purrr como Alternativa
+
+## Por que preferir purrr?
+
+- código mais limpo;
+- sem variável de estado;
+- integrado ao tidyverse;
+- `map_dfr()` combina automaticamente.
+
+## Equivalente com purrr
+
+```{r}
+#| eval: false
+library(purrr)
+
+urls <- paste0("https://portal.com/noticias?page=", 1:10)
+
+df <- map_dfr(urls, function(url) {
+  Sys.sleep(1.5)
+  pagina <- read_html(url)
+  extrair_dados(pagina)
+})
+```
+
+# Gerar URLs Automaticamente
+
+## paste0() para construir vetores de URLs
+
+```{r}
+# Paginação numérica
+urls_num <- paste0(
+  "https://agenciabrasil.ebc.com.br/internacional?page=",
+  0:9
+)
+
+head(urls_num, 3)
+```
+
+## Offsets
+
+```{r}
+offsets <- seq(0, 180, by = 20)
+
+urls_offset <- paste0(
+  "https://api.exemplo.com/dados?offset=",
+  offsets
+)
+
+head(urls_offset, 4)
+```
+
+## Múltiplas seções
+
+```{r}
+secoes <- c("internacional", "economia", "diplomacia")
+
+urls_secoes <- paste0(
+  "https://agenciabrasil.ebc.com.br/",
+  secoes
+)
+
+urls_secoes
+```
+
+# Seguir Link "Próxima Página"
+
+## Estratégia com while
+
+```{r}
+#| eval: false
+url_atual <- "https://portal.com/noticias"
+resultados <- list()
+i <- 1
+
+while (!is.null(url_atual)) {
+
+  pagina <- read_html(url_atual)
+
+  resultados[[i]] <- extrair_dados(pagina)
+
+  # Procurar link da próxima página
+  proxima <- pagina |>
+    html_element("a[rel='next']") |>
+    html_attr("href")
+
+  url_atual <- proxima
+  i <- i + 1
+
+  Sys.sleep(1.5)
+}
+
+df <- bind_rows(resultados)
+```
+
+# Monitorar Progresso
+
+## Saber onde está o loop
+
+```{r}
+#| eval: false
+n_paginas <- 20
+
+for (i in seq_len(n_paginas)) {
+
+  # Progresso no console
+  cat(sprintf("[%d/%d] Raspando...\n", i, n_paginas))
+
+  # ... scraping ...
+
+  Sys.sleep(1)
+}
+```
+
+## Com purrr e progressão
+
+```{r}
+#| eval: false
+# Ativa barra de progresso automática
+options(purrr.progress = TRUE)
+
+df <- map_dfr(urls, raspar_pagina)
+```
+
+# Parar com Condição
+
+## Parar quando não há mais notícias
+
+```{r}
+#| eval: false
+resultados <- list()
+
+for (p in 1:100) {
+
+  url <- paste0("https://portal.com?page=", p)
+  pagina <- tryCatch(read_html(url), error = function(e) NULL)
+
+  if (is.null(pagina)) break
+
+  dados <- extrair_noticias(pagina)
+
+  # Parar se página está vazia
+  if (nrow(dados) == 0) {
+    cat("Fim dos resultados na página", p, "\n")
+    break
+  }
+
+  resultados[[p]] <- dados
+  Sys.sleep(1.5)
+}
+```
+
+# Scraping com Parâmetros de Data
+
+## APIs e portais que filtram por data
+
+```{r}
+#| eval: false
+# Gerar sequência de datas
+datas <- seq.Date(
+  from = as.Date("2025-01-01"),
+  to   = as.Date("2025-12-31"),
+  by   = "month"
+)
+
+# Raspar mês a mês
+df_anual <- map_dfr(datas, function(d) {
+
+  url <- paste0(
+    "https://api.worldbank.org/v2/country/BRA/indicator/NY.GDP.MKTP.CD",
+    "?format=json&date=", format(d, "%Y")
+  )
+
+  Sys.sleep(1)
+  resp <- request(url) |> req_perform()
+  # ...
+})
+```
+
+# Combinando Portais e Seções
+
+## Raspar múltiplos tópicos
+
+```{r}
+#| eval: false
+config_portais <- tibble(
+  portal  = c("Agência Brasil", "ONU Brasil"),
+  url_base = c(
+    "https://agenciabrasil.ebc.com.br/internacional?page=",
+    "https://brasil.un.org/pt-br/news?page="
+  ),
+  n_paginas = c(10, 5)
+)
+
+df_todos <- pmap_dfr(
+  config_portais,
+  function(portal, url_base, n_paginas) {
+
+    map_dfr(0:(n_paginas - 1), function(p) {
+      Sys.sleep(1.5)
+      pagina <- tryCatch(read_html(paste0(url_base, p)), error = function(e) NULL)
+      if (is.null(pagina)) return(tibble())
+
+      tibble(
+        titulo = pagina |> html_elements("h2") |> html_text2(),
+        portal = portal
+      )
+    })
+  }
+)
+```
+
+# Delays Adaptativos
+
+## Respeitar o servidor
+
+```{r}
+#| eval: false
+for (url in urls) {
+
+  resp <- request(url) |> req_perform()
+
+  # Se receber 429 (rate limit), esperar mais
+  if (resp_status(resp) == 429) {
+    cat("Rate limit — aguardando 30s...\n")
+    Sys.sleep(30)
+    next
+  }
+
+  # Delay normal entre requisições
+  Sys.sleep(runif(1, 1, 3))  # entre 1 e 3 segundos (aleatório)
+}
+```
+
+# Salvar em Lotes
+
+## Não perder progresso
+
+```{r}
+#| eval: false
+for (p in 1:50) {
+
+  url <- paste0("https://portal.com?page=", p)
+  dados <- raspar_pagina(url)
+
+  # Salvar a cada 10 páginas
+  if (p %% 10 == 0) {
+    write_csv(bind_rows(resultados), paste0("data/raw/lote_", p, ".csv"))
+    cat("Lote salvo: página", p, "\n")
+  }
+
+  Sys.sleep(1.5)
+}
+```
+
+# Exercício
+
+## Raspar múltiplas páginas em escala
+
+Escolha um portal com paginação por URL.
+
+1. Identifique o padrão da URL;
+2. Gere o vetor de URLs (`paste0`);
+3. Escreva a função de extração;
+4. Itere com `map_dfr()`;
+5. Use `Sys.sleep(1.5)` entre requisições;
+6. Monitore o progresso;
+7. Salve o resultado em CSV;
+8. Relate quantas observações coletou.
+
+# Próxima Aula
+
+## Robustez e Tratamento de Erros
+
+- `tryCatch()`;
+- delays e retentativas;
+- logging;
+- scraping resiliente.
+
+# Obrigado
+
+## Perguntas?

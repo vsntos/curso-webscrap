@@ -1,0 +1,480 @@
+---
+title: "Aula 5"
+subtitle: "Introdução ao Scraping com rvest"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Introdução ao Scraping com rvest
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# Chegou a Hora
+
+## Sabemos
+
+- que dados digitais têm valor em RI;
+- que há limites éticos e legais;
+- como HTML e CSS estruturam páginas;
+- como HTTP funciona.
+
+## Agora vamos raspar
+
+Com `rvest`, extraímos dados estruturados de páginas HTML.
+
+# O Pacote rvest
+
+## Criado pelo Hadley Wickham
+
+`rvest` é o pacote padrão para scraping em R.
+
+- integrado ao tidyverse;
+- sintaxe simples e legível;
+- funciona com CSS selectors e XPath.
+
+```{r}
+library(rvest)
+```
+
+# Funções Principais
+
+## Leitura
+
+| Função | Uso |
+|---|---|
+| `read_html()` | lê uma página HTML |
+
+## Seleção
+
+| Função | Uso |
+|---|---|
+| `html_elements()` | todos os elementos |
+| `html_element()` | apenas o primeiro |
+
+## Extração
+
+| Função | Uso |
+|---|---|
+| `html_text2()` | texto do elemento |
+| `html_attr()` | atributo específico |
+| `html_table()` | tabela HTML |
+
+# Fluxo Básico de Scraping
+
+## Três etapas
+
+```{r}
+#| eval: false
+# 1. Ler a página
+pagina <- read_html("https://site.com")
+
+# 2. Selecionar elementos
+elementos <- pagina |>
+  html_elements(".classe-do-elemento")
+
+# 3. Extrair conteúdo
+textos <- elementos |>
+  html_text2()
+```
+
+# Exemplo: Agência Brasil
+
+## Portal de notícias público
+
+```{r}
+#| eval: false
+library(rvest)
+library(tidyverse)
+
+url <- "https://agenciabrasil.ebc.com.br/internacional"
+
+pagina <- read_html(url)
+pagina
+```
+
+## Inspecionar → identificar → selecionar
+
+```{r}
+#| eval: false
+# Títulos das notícias
+titulos <- pagina |>
+  html_elements("h2") |>
+  html_text2()
+
+head(titulos)
+```
+
+# Construindo o Dataset
+
+## Um vetor por campo
+
+```{r}
+#| eval: false
+titulos <- pagina |>
+  html_elements(".field-content a") |>
+  html_text2()
+
+links <- pagina |>
+  html_elements(".field-content a") |>
+  html_attr("href")
+```
+
+## Montando o tibble
+
+```{r}
+#| eval: false
+library(tibble)
+
+df <- tibble(
+  titulo = titulos,
+  link   = links
+)
+
+df
+```
+
+# Scraping de Tabelas
+
+## html_table()
+
+Converte diretamente `<table>` em dataframe.
+
+```{r}
+url_wiki <- "https://pt.wikipedia.org/wiki/Pa%C3%ADses_membros_da_ONU"
+
+pagina_wiki <- read_html(url_wiki)
+
+tabelas <- pagina_wiki |>
+  html_table(fill = TRUE)
+
+length(tabelas)
+```
+
+## Acessando a tabela certa
+
+```{r}
+# Ver a primeira tabela
+head(tabelas[[1]])
+```
+
+# Texto vs Atributo
+
+## Quando usar cada um?
+
+```{r}
+#| eval: false
+# Texto visível do elemento
+html_elements(pagina, "h2") |>
+  html_text2()
+
+# Atributo href (endereço do link)
+html_elements(pagina, "a") |>
+  html_attr("href")
+
+# Atributo src (endereço da imagem)
+html_elements(pagina, "img") |>
+  html_attr("src")
+
+# Atributo class
+html_elements(pagina, "div") |>
+  html_attr("class")
+```
+
+# Seletores Avançados
+
+## Especificidade progressiva
+
+```css
+/* Simples */
+h2
+
+/* Por classe */
+.titulo-noticia
+
+/* Combinado */
+article h2
+
+/* Descendente com classe */
+.feed-post .titulo
+
+/* Atributo */
+a[href^="https://"]
+```
+
+## Testando no R
+
+```{r}
+#| eval: false
+# Quantos elementos encontrou?
+pagina |>
+  html_elements(".titulo") |>
+  length()
+
+# Ver o texto dos 5 primeiros
+pagina |>
+  html_elements(".titulo") |>
+  html_text2() |>
+  head(5)
+```
+
+# Scraping Ético com rvest
+
+## Boas práticas
+
+```{r}
+#| eval: false
+# 1. Identificar o scraper
+session <- session("https://site.com") |>
+  session_set_header("User-Agent", "Curso RI / pesquisa")
+
+# 2. Respeitar delays
+Sys.sleep(1)
+
+# 3. Verificar robots.txt manualmente antes
+```
+
+## Verificar robots.txt
+
+```{r}
+#| eval: false
+# Verificar antes de raspar
+browseURL("https://agenciabrasil.ebc.com.br/robots.txt")
+```
+
+# Tratamento de Erros
+
+## Páginas que falham
+
+```{r}
+#| eval: false
+raspar_pagina <- function(url) {
+
+  tryCatch(
+    {
+      Sys.sleep(1)
+      read_html(url)
+    },
+    error = function(e) {
+      message("Falhou: ", url)
+      return(NULL)
+    }
+  )
+
+}
+```
+
+## Filtrar resultados nulos
+
+```{r}
+#| eval: false
+resultados <- purrr::map(urls, raspar_pagina)
+
+# Remover falhas
+resultados_validos <- purrr::compact(resultados)
+```
+
+# Scraping de Múltiplas Páginas
+
+## Preparar URLs
+
+```{r}
+#| eval: false
+# Gerar URLs de paginação
+paginas <- paste0(
+  "https://agenciabrasil.ebc.com.br/internacional?page=",
+  0:4
+)
+
+paginas
+```
+
+## Iterar com purrr
+
+```{r}
+#| eval: false
+extrair_titulos <- function(url) {
+
+  Sys.sleep(1.5)
+
+  pagina <- tryCatch(
+    read_html(url),
+    error = function(e) return(NULL)
+  )
+
+  if (is.null(pagina)) return(tibble())
+
+  tibble(
+    titulo = pagina |>
+      html_elements("h2") |>
+      html_text2(),
+    url_fonte = url
+  )
+}
+
+df_todas <- purrr::map_dfr(paginas, extrair_titulos)
+```
+
+# Limpeza de Texto
+
+## Problemas comuns
+
+```{r}
+#| eval: false
+titulos_brutos <- c(
+  "  Diplomacia brasileira   \n",
+  "\t ONU debate crise\n",
+  "OTAN amplia presença   "
+)
+
+# Limpar espaços e quebras de linha
+titulos_limpos <- stringr::str_squish(titulos_brutos)
+
+titulos_limpos
+```
+
+## Remover strings indesejadas
+
+```{r}
+#| eval: false
+# Remover prefixos padronizados
+titulos <- stringr::str_remove(titulos, "^Notícia: ")
+
+# Remover espaços duplos
+titulos <- stringr::str_squish(titulos)
+```
+
+# Exemplo Completo
+
+## Do zero ao dataset
+
+```{r}
+#| eval: false
+library(rvest)
+library(tidyverse)
+
+# 1. URL alvo (verificar robots.txt antes)
+url <- "https://agenciabrasil.ebc.com.br/internacional"
+
+# 2. Ler página
+pagina <- read_html(url)
+
+# 3. Extrair elementos
+titulos <- pagina |>
+  html_elements("h2") |>
+  html_text2() |>
+  stringr::str_squish()
+
+links <- pagina |>
+  html_elements("h2 a") |>
+  html_attr("href")
+
+# 4. Construir dataset
+df <- tibble(
+  titulo     = titulos,
+  link       = links,
+  coletado   = Sys.time()
+) |>
+  filter(nchar(titulo) > 5)
+
+# 5. Salvar
+write_csv(df, "noticias_internacionais.csv")
+
+df
+```
+
+# Quando rvest Não Funciona
+
+## Páginas dinâmicas (JavaScript)
+
+Alguns sites renderizam conteúdo com JavaScript.
+
+`read_html()` captura apenas o HTML inicial — sem JS.
+
+```{r}
+#| eval: false
+# rvest captura isso:
+<div id="noticias"></div>
+
+# Mas o conteúdo só aparece DEPOIS do JS rodar:
+<div id="noticias">
+  <article>...</article>
+  <article>...</article>
+</div>
+```
+
+## Solução: Selenium
+
+Para conteúdo dinâmico usamos `RSelenium`.
+
+Assunto das aulas 9 e 10.
+
+# Exercício
+
+## Raspar notícias internacionais
+
+Escolha um dos portais:
+
+- `https://agenciabrasil.ebc.com.br/internacional`
+- `https://brasil.un.org/pt-br/news`
+- `https://www.bbc.com/portuguese/internacional`
+
+Construa um dataset com:
+
+- título da notícia;
+- link completo;
+- data de coleta.
+
+Depois:
+
+- remova duplicatas;
+- salve em CSV;
+- interprete os temas mais frequentes.
+
+# Próxima Aula
+
+## Estruturando Dados
+
+- listas → dataframes;
+- limpeza de texto;
+- normalização de datas;
+- construção de datasets com 100+ observações.
+
+# Obrigado
+
+## Perguntas?

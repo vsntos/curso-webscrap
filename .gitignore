@@ -1,0 +1,42 @@
+# ── Quarto ──────────────────────────────────────────────────────────
+/_site/
+/.quarto/
+# _freeze/ é versionado intencionalmente: o GitHub Actions usa o cache
+# para não re-executar código R pesado a cada push.
+# Mas site_libs dentro do freeze são assets gerados automaticamente.
+/_freeze/site_libs/
+
+# ── R ───────────────────────────────────────────────────────────────
+.Rhistory
+.RData
+.Ruserdata
+*.Rproj.user/
+
+# renv
+renv/library/
+renv/local/
+renv/lock/  # keep renv.lock — remove this line if you want to track it
+
+# ── Secrets / environment ────────────────────────────────────────────
+.Renviron
+.env
+*.key
+*_secret*
+*_token*
+
+# ── Data (raw downloads — track only derived/clean data) ─────────────
+data/raw/
+data/cache/
+
+# ── OS / editor ──────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ── Rendered artefacts leftover from root ────────────────────────────
+/*.html
+/*_files/
+
+# ── targets pipeline cache ───────────────────────────────────────────
+_targets/

@@ -1,0 +1,414 @@
+---
+title: "Aula 8"
+subtitle: "Robustez e Tratamento de Erros"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Robustez e Tratamento de Erros
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# O que Pode Dar Errado
+
+## Tudo
+
+- servidor fora do ar;
+- timeout de conexão;
+- mudança de estrutura HTML;
+- rate limiting (429);
+- redirecionamentos inesperados;
+- elementos ausentes na página;
+- HTML malformado;
+- encoding inconsistente.
+
+## Um script frágil quebra na primeira falha
+
+Um script robusto:
+
+- registra o erro;
+- continua para o próximo item;
+- tenta de novo quando faz sentido;
+- entrega o que conseguiu coletar.
+
+# tryCatch()
+
+## A ferramenta central
+
+```{r}
+resultado <- tryCatch(
+  {
+    # Código que pode falhar
+    log(-1)
+  },
+  warning = function(w) {
+    cat("Aviso:", conditionMessage(w), "\n")
+    NA
+  },
+  error = function(e) {
+    cat("Erro:", conditionMessage(e), "\n")
+    NULL
+  }
+)
+
+resultado
+```
+
+## Aplicado ao scraping
+
+```{r}
+#| eval: false
+pagina <- tryCatch(
+  read_html(url),
+  error = function(e) {
+    message("Falha ao acessar: ", url)
+    return(NULL)
+  }
+)
+
+if (is.null(pagina)) return(tibble())
+```
+
+# possibly() e safely()
+
+## purrr oferece wrappers convenientes
+
+```{r}
+library(purrr)
+
+# possibly: retorna valor padrão em caso de erro
+ler_pagina_segura <- possibly(
+  read_html,
+  otherwise = NULL
+)
+
+# safely: retorna lista com $result e $error
+ler_pagina_detalhada <- safely(read_html)
+```
+
+## Usando possibly()
+
+```{r}
+#| eval: false
+urls <- c(
+  "https://agenciabrasil.ebc.com.br/internacional",
+  "https://url-que-nao-existe.xyz/pagina"
+)
+
+paginas <- map(urls, possibly(read_html, otherwise = NULL))
+
+# Filtrar sucessos
+paginas_validas <- compact(paginas)
+```
+
+## Usando safely()
+
+```{r}
+#| eval: false
+resultados <- map(urls, safely(read_html))
+
+# Separar resultados e erros
+paginas <- map(resultados, "result")
+erros   <- map(resultados, "error")
+
+# Quais falharam?
+failed <- map_lgl(erros, ~!is.null(.x))
+urls[failed]
+```
+
+# Retentativas
+
+## Tentar de novo em caso de falha temporária
+
+```{r}
+#| eval: false
+raspar_com_retry <- function(url, max_tentativas = 3) {
+
+  for (tentativa in seq_len(max_tentativas)) {
+
+    pagina <- tryCatch(
+      read_html(url),
+      error = function(e) NULL
+    )
+
+    if (!is.null(pagina)) return(pagina)
+
+    # Espera exponencial entre tentativas
+    delay <- 2 ^ tentativa
+    cat(sprintf(
+      "Tentativa %d falhou. Aguardando %ds...\n",
+      tentativa, delay
+    ))
+    Sys.sleep(delay)
+  }
+
+  message("Todas as tentativas falharam: ", url)
+  return(NULL)
+}
+```
+
+## httr2 tem retry embutido
+
+```{r}
+#| eval: false
+library(httr2)
+
+resp <- request(url) |>
+  req_retry(
+    max_tries = 5,
+    backoff   = ~ 2 ^ .x  # 2, 4, 8, 16s
+  ) |>
+  req_perform()
+```
+
+# Logging de Erros
+
+## Registrar o que deu errado
+
+```{r}
+#| eval: false
+log_file <- "logs/scraping_erros.txt"
+dir.create("logs", showWarnings = FALSE)
+
+log_erro <- function(url, mensagem) {
+  linha <- sprintf(
+    "[%s] ERRO em %s: %s\n",
+    format(Sys.time(), "%Y-%m-%d %H:%M:%S"),
+    url,
+    mensagem
+  )
+  cat(linha)
+  cat(linha, file = log_file, append = TRUE)
+}
+
+# Usar no loop
+pagina <- tryCatch(
+  read_html(url),
+  error = function(e) {
+    log_erro(url, e$message)
+    return(NULL)
+  }
+)
+```
+
+# Validar Resultados
+
+## Verificar antes de usar
+
+```{r}
+validar_pagina <- function(pagina, seletor = "h2") {
+
+  if (is.null(pagina)) return(FALSE)
+
+  elementos <- html_elements(pagina, seletor)
+
+  if (length(elementos) == 0) {
+    message("Nenhum elemento encontrado para: ", seletor)
+    return(FALSE)
+  }
+
+  TRUE
+}
+```
+
+## Verificar dataset resultante
+
+```{r}
+#| eval: false
+validar_dataset <- function(df, n_min = 5) {
+
+  if (nrow(df) < n_min) {
+    warning(sprintf(
+      "Dataset muito pequeno: %d observações (mínimo: %d)",
+      nrow(df), n_min
+    ))
+    return(FALSE)
+  }
+
+  if (any(is.na(df$titulo))) {
+    warning("Títulos com NA encontrados.")
+  }
+
+  TRUE
+}
+```
+
+# Tratando Encoding
+
+## Páginas com caracteres especiais
+
+```{r}
+#| eval: false
+# rvest detecta automaticamente na maioria dos casos
+pagina <- read_html(url, encoding = "UTF-8")
+
+# Forçar conversão se necessário
+texto <- stringr::str_conv(texto_bruto, "UTF-8")
+
+# Remover caracteres de controle
+texto_limpo <- stringr::str_remove_all(texto, "[\\x00-\\x1F]")
+```
+
+# Timeouts
+
+## Evitar ficar preso em conexões lentas
+
+```{r}
+#| eval: false
+library(httr2)
+
+resp <- request(url) |>
+  req_timeout(10) |>   # 10 segundos máximo
+  req_perform()
+```
+
+## Com rvest via session
+
+```{r}
+#| eval: false
+library(rvest)
+
+# httr::config para definir timeout
+pagina <- tryCatch(
+  read_html(
+    httr::GET(url, httr::timeout(10))
+  ),
+  error = function(e) NULL
+)
+```
+
+# Scraping Ético: o Que Não Fazer
+
+## Comportamentos a evitar
+
+- requisições sem delay;
+- parallelismo agressivo;
+- ignorar 429;
+- contornar CAPTCHAs;
+- falsificar identidade.
+
+## Comportamentos corretos
+
+```{r}
+#| eval: false
+request(url) |>
+  # Identificar corretamente
+  req_user_agent("Pesquisa acadêmica RI / vinicius@uni.br") |>
+
+  # Respeitar rate limits
+  req_throttle(rate = 10 / 60) |>
+
+  # Retry apenas em erros transitórios
+  req_retry(max_tries = 3) |>
+
+  req_perform()
+```
+
+# Script Robusto Completo
+
+## Estrutura recomendada
+
+```{r}
+#| eval: false
+raspar_pagina_robusta <- function(url) {
+
+  # 1. Delay respeitoso
+  Sys.sleep(runif(1, 1, 2))
+
+  # 2. Requisição com retry e timeout
+  resp <- tryCatch(
+    request(url) |>
+      req_user_agent("Curso RI") |>
+      req_timeout(15) |>
+      req_retry(max_tries = 3) |>
+      req_perform(),
+    error = function(e) {
+      log_erro(url, e$message)
+      return(NULL)
+    }
+  )
+
+  if (is.null(resp)) return(tibble())
+  if (resp_status(resp) != 200) return(tibble())
+
+  # 3. Parse
+  pagina <- resp |>
+    resp_body_string() |>
+    read_html()
+
+  # 4. Extração segura
+  titulos <- tryCatch(
+    pagina |> html_elements("h2") |> html_text2(),
+    error = function(e) character(0)
+  )
+
+  if (length(titulos) == 0) return(tibble())
+
+  # 5. Retornar
+  tibble(titulo = titulos, url_fonte = url, coletado = Sys.time())
+}
+```
+
+# Exercício
+
+## Tornar o scraper resiliente
+
+Pegue o código da Aula 7.
+
+Adicione:
+
+1. `tryCatch()` em todas as chamadas de rede;
+2. log de erros em arquivo `.txt`;
+3. validação do dataset resultante;
+4. delay aleatório (`runif`);
+5. retry manual (3 tentativas);
+6. relatório final: quantas páginas OK vs falha.
+
+# Próxima Aula
+
+## JavaScript e Conteúdo Dinâmico
+
+- quando rvest não é suficiente;
+- como identificar páginas dinâmicas;
+- inspeção de rede no navegador;
+- APIs ocultas.
+
+# Obrigado
+
+## Perguntas?

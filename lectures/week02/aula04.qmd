@@ -1,0 +1,412 @@
+---
+title: "Aula 4"
+subtitle: "Requests e Respostas HTTP"
+author: "Vinicius Santos"
+
+format:
+  revealjs:
+    theme: simple
+    css: custom.scss
+
+    width: 1600
+    height: 900
+
+    slide-number: c/t
+    progress: true
+    controls: true
+    navigation-mode: linear
+
+    transition: fade
+    background-transition: fade
+
+    chalkboard: true
+    preview-links: auto
+    code-copy: true
+
+    center: false
+    smaller: false
+    toc: false
+
+    footer: "Web Scraping e Dados Digitais em RI"
+
+    highlight-style: github
+
+execute:
+  echo: true
+  warning: false
+  message: false
+
+editor: visual
+---
+
+## Requests e Respostas HTTP
+
+### Vinicius Santos
+
+#### Web Scraping e Dados Digitais em RI
+
+# O que Acontece Quando Você Acessa um Site?
+
+## Uma conversa entre cliente e servidor
+
+Quando você digita uma URL:
+
+1. seu navegador **envia uma requisição**;
+2. o servidor **processa**;
+3. o servidor **devolve uma resposta**;
+4. seu navegador **renderiza**.
+
+## Scraping imita esse processo
+
+Em vez do navegador, usamos R.
+
+Em vez de renderizar, extraímos dados.
+
+# HTTP
+
+## HyperText Transfer Protocol
+
+Protocolo que define como cliente e servidor se comunicam.
+
+Todo acesso à web usa HTTP (ou HTTPS, sua versão segura).
+
+# Métodos HTTP
+
+## GET
+
+- solicita um recurso;
+- mais comum;
+- parâmetros ficam na URL.
+
+```
+GET https://api.worldbank.org/v2/country/BRA/indicator/NY.GDP.MKTP.CD?format=json
+```
+
+## POST
+
+- envia dados ao servidor;
+- formulários de login;
+- parâmetros ficam no corpo da requisição.
+
+```
+POST https://sistema.gov.br/autenticar
+body: { usuario: "pesquisador", senha: "..." }
+```
+
+## Outros métodos
+
+| Método | Uso |
+|---|---|
+| `GET` | buscar dados |
+| `POST` | enviar dados |
+| `PUT` | atualizar recurso |
+| `DELETE` | remover recurso |
+
+Para scraping, usamos quase sempre **GET**.
+
+# Status Codes
+
+## O servidor sempre responde com um código
+
+| Código | Significado |
+|---|---|
+| `200` | OK — sucesso |
+| `301` | Redirecionamento permanente |
+| `400` | Requisição inválida |
+| `401` | Não autenticado |
+| `403` | Proibido (acesso negado) |
+| `404` | Não encontrado |
+| `429` | Muitas requisições (rate limit) |
+| `500` | Erro interno do servidor |
+
+## O que fazer com cada código?
+
+- `200` → extrair dados;
+- `301` → seguir redirecionamento;
+- `403` → verificar permissões / robots.txt;
+- `429` → esperar e tentar de novo (`Sys.sleep()`);
+- `404` → URL errada ou recurso removido;
+- `500` → aguardar ou reportar problema.
+
+# Headers HTTP
+
+## Metadados da requisição e da resposta
+
+Headers transmitem informação sobre:
+
+- quem está fazendo a requisição;
+- que tipo de conteúdo é aceito;
+- autenticação;
+- cache.
+
+## Headers de requisição importantes
+
+| Header | Função |
+|---|---|
+| `User-Agent` | identifica o cliente |
+| `Accept` | tipo de resposta aceita |
+| `Authorization` | credenciais / token |
+| `Referer` | página de origem |
+
+## User-Agent
+
+Informa ao servidor quem está fazendo a requisição.
+
+```
+User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) ...
+User-Agent: Curso de Web Scraping em RI / pesquisa acadêmica
+```
+
+Boas práticas:
+
+- sempre identificar sua ferramenta;
+- informar finalidade acadêmica;
+- nunca imitar um navegador real para contornar restrições.
+
+# URL: Anatomia
+
+## Uma URL tem partes
+
+```
+https://api.worldbank.org/v2/country/BRA/indicator/NY.GDP.MKTP.CD?format=json&per_page=100
+ │         │                   │                    │               │
+ │         │                   │                    │               └── query string
+ │         │                   │                    └── path
+ │         │                   └── endpoint
+ │         └── host
+ └── protocolo
+```
+
+## Query string
+
+Parâmetros passados na URL.
+
+```
+?chave=valor&outra_chave=outro_valor
+```
+
+Exemplos:
+
+```
+?format=json
+?page=2&per_page=50
+?q=diplomacia&lang=pt
+```
+
+# httr2 em R
+
+## O pacote para fazer requisições
+
+```{r}
+#| eval: false
+library(httr2)
+
+# Requisição básica
+resp <- request("https://api.worldbank.org/v2/country/BRA?format=json") |>
+  req_perform()
+
+# Status
+resp_status(resp)
+
+# Corpo da resposta como texto
+resp_body_string(resp)
+```
+
+## Fluxo padrão
+
+```{r}
+#| eval: false
+resposta <- request(url) |>
+  req_user_agent("Curso RI / pesquisa acadêmica") |>
+  req_retry(max_tries = 3) |>
+  req_perform()
+```
+
+# Exemplo: Banco Mundial
+
+## Consultando uma API pública
+
+```{r}
+library(httr2)
+library(jsonlite)
+library(tidyverse)
+
+url <- paste0(
+  "https://api.worldbank.org/v2/country/",
+  "BRA",
+  "/indicator/",
+  "NY.GDP.MKTP.CD",
+  "?format=json&per_page=10"
+)
+
+resp <- request(url) |>
+  req_user_agent("Curso Web Scraping em RI") |>
+  req_retry(max_tries = 3) |>
+  req_perform()
+
+resp_status(resp)
+```
+
+## Inspecionando a resposta
+
+```{r}
+# Headers da resposta
+resp_headers(resp)
+```
+
+## Extraindo os dados
+
+```{r}
+dados <- resp |>
+  resp_body_string() |>
+  fromJSON()
+
+# Estrutura: [[1]] metadados, [[2]] dados
+head(dados[[2]])
+```
+
+# Autenticação
+
+## APIs com chave
+
+Muitas APIs exigem autenticação via **API Key**.
+
+```{r}
+#| eval: false
+resp <- request("https://api.exemplo.com/dados") |>
+  req_headers(
+    Authorization = paste("Bearer", Sys.getenv("MINHA_API_KEY"))
+  ) |>
+  req_perform()
+```
+
+## Boas práticas com chaves
+
+- nunca coloque chaves no código;
+- use variáveis de ambiente (`.Renviron`);
+- `.Renviron` nunca vai para o Git.
+
+```bash
+# ~/.Renviron
+WORLDBANK_KEY=sua_chave_aqui
+GDELT_KEY=sua_chave_aqui
+```
+
+# Rate Limiting
+
+## APIs têm limites de requisição
+
+- X requisições por minuto;
+- X requisições por hora;
+- X requisições por dia.
+
+## Como respeitar os limites
+
+```{r}
+#| eval: false
+for (pais in paises) {
+
+  resp <- request(url) |>
+    req_perform()
+
+  # Esperar entre requisições
+  Sys.sleep(1)
+
+}
+```
+
+## httr2 facilita o controle
+
+```{r}
+#| eval: false
+request(url) |>
+  req_throttle(rate = 10 / 60) |>  # 10 req/min
+  req_retry(
+    max_tries = 5,
+    backoff    = ~ 2 ^ .x          # espera exponencial
+  ) |>
+  req_perform()
+```
+
+# APIs em RI: Exemplos
+
+## Bases de dados internacionais com API
+
+| Fonte | Dados |
+|---|---|
+| Banco Mundial | PIB, comércio, população |
+| FMI | dados macroeconômicos |
+| GDELT Project | eventos internacionais |
+| SIPRI | gastos militares |
+| UN Comtrade | comércio bilateral |
+| Open Sanctions | sanções econômicas |
+
+# Diferença: API vs Scraping
+
+## APIs são formais
+
+- documentação clara;
+- estrutura estável;
+- autenticação oficial;
+- limites explícitos.
+
+## Scraping é informal
+
+- lemos o HTML como humanos;
+- estrutura pode mudar;
+- sem garantias;
+- requer mais adaptação.
+
+# Inspeção de Rede no Navegador
+
+## DevTools → Network
+
+Mostra todas as requisições que o navegador faz.
+
+Útil para:
+
+- encontrar APIs ocultas;
+- ver os headers reais;
+- capturar endpoints de dados.
+
+## Como usar
+
+1. `F12` → aba **Network**;
+2. recarregar a página;
+3. filtrar por `XHR` ou `Fetch`;
+4. inspecionar as requisições de dados.
+
+# Exercício
+
+## Requisições a uma API pública
+
+Escolha um país do BRICS:
+
+- BRA, RUS, IND, CHN, ZAF
+
+Colete e visualize dois indicadores:
+
+- PIB: `NY.GDP.MKTP.CD`
+- Exportações: `NE.EXP.GNFS.CD`
+
+Para cada indicador:
+
+1. construa a URL;
+2. faça a requisição com httr2;
+3. verifique o status code;
+4. extraia e limpe os dados;
+5. plote a série temporal.
+
+# Próxima Aula
+
+## Introdução ao Scraping com rvest
+
+- `read_html()`;
+- `html_elements()`;
+- `html_text2()`;
+- extração em escala;
+- construção de dataset.
+
+# Obrigado
+
+## Perguntas?
