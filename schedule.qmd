@@ -3,13 +3,6 @@ title: "Cronograma"
 subtitle: "Web Scraping e Dados Digitais em Relações Internacionais · 2026"
 ---
 
-```{r}
-#| echo: false
-#| message: false
-library(tibble)
-library(knitr)
-```
-
 ## Visão Geral
 
 O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto semana 8), totalizando 15 aulas de 3 horas cada.
@@ -245,20 +238,14 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 ## Datas e Prazos
 
-```{r}
-#| echo: false
-prazos <- tribble(
-  ~Data,        ~Evento,
-  "Semana 1",   "Início do curso — configuração do ambiente R + Quarto",
-  "Semana 2",   "Primeiro exercício avaliado: script de coleta via API",
-  "Semana 4",   "Proposta do trabalho individual (1 parágrafo + fonte)",
-  "Semana 6",   "⚠️ Entrega do trabalho individual",
-  "Semana 7",   "Formação dos grupos e proposta do projeto final",
-  "Semana 8",   "⚠️ Entrega e apresentação do projeto final"
-)
-
-kable(prazos, align = c("l", "l"))
-```
+| Data | Evento |
+|---|---|
+| Semana 1 | Início do curso — configuração do ambiente R + Quarto |
+| Semana 2 | Primeiro exercício avaliado: script de coleta via API |
+| Semana 4 | Proposta do trabalho individual (1 parágrafo + fonte) |
+| Semana 6 | ⚠️ Entrega do trabalho individual |
+| Semana 7 | Formação dos grupos e proposta do projeto final |
+| Semana 8 | ⚠️ Entrega e apresentação do projeto final |
 
 ---
 

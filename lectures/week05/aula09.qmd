@@ -32,6 +32,7 @@ format:
     highlight-style: github
 
 execute:
+  eval: false
   echo: true
   warning: false
   message: false
