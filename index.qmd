@@ -92,4 +92,4 @@ install.packages(c(
 
 ---
 
-*PPGRI · 2026 · Vinicius Santos*
+*Data Mundi · 2026 · Vinicius Santos*
