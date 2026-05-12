@@ -11,7 +11,7 @@ subtitle: "Web Scraping e Dados Digitais em Relações Internacionais"
 | **Laboratório** | Data Mundi |
 | **Nível** | Aberto a qualquer nível, com conhecimentos introdutórios de R |
 | **Carga horária** | 45h (15 aulas de 3h) |
-| **Modalidade** | Presencial com materiais digitais abertos |
+| **Modalidade** | Remoto síncrono |
 | **Docente** | Vinicius Santos |
 | **Ano** | 2026 |
 
