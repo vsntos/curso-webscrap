@@ -5,16 +5,16 @@ subtitle: "Laboratório Data Mundi · 2026"
 
 ## Visão Geral
 
-O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto semana 8), totalizando 15 aulas de 3 horas cada.
+O curso é estruturado em **8 dias**, com **2 aulas por dia** (exceto dia 8), totalizando 15 aulas de 3 horas cada.
 
 ::: {.callout-note}
-**Entrega do trabalho individual:** ao final da Semana 6 (após Aula 12).
+**Entrega do trabalho individual:** ao final da Dia 6 (após Aula 12).
 **Apresentações do projeto final:** Aula 15.
 :::
 
 ---
 
-## Semana 1 — Fundamentos e Panorama
+## Dia 1 — Fundamentos e Panorama
 
 | | |
 |---|---|
@@ -42,7 +42,7 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 ---
 
-## Semana 2 — Web Foundations
+## Dia 2 — Web Foundations
 
 | | |
 |---|---|
@@ -72,7 +72,7 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 ---
 
-## Semanas 3–4 — Scraping Estático
+## Dias 3 e 4 — Scraping Estático
 
 | | |
 |---|---|
@@ -122,7 +122,7 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 ---
 
-## Semana 5 — Scraping Dinâmico
+## Dia 5 — Scraping Dinâmico
 
 | | |
 |---|---|
@@ -152,13 +152,13 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 ---
 
-## Semana 6 — Infraestrutura e Reprodutibilidade {#semana-6}
+## Dia 6 — Infraestrutura e Reprodutibilidade {#dia-6}
 
 | | |
 |---|---|
 | **Tema** | Organização de projetos e pipelines |
 | **Pacotes** | `fs`, `renv`, `targets`, `tarchetypes` |
-| **Entrega** | ⚠️ Trabalho individual ao final desta semana |
+| **Entrega** | ⚠️ Trabalho individual ao final deste dia |
 
 ### Aula 11 — Organização de Projetos
 
@@ -181,17 +181,17 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 **Script:** `scripts/aula12_pipelines_targets.R`
 
-> **⚠️ Trabalho individual:** entregar até domingo ao final desta semana.
+> **⚠️ Trabalho individual:** entregar até domingo ao final deste dia.
 
 ---
 
-## Semana 7 — Texto e NLP
+## Dia 7 — Texto e NLP
 
 | | |
 |---|---|
 | **Tema** | Análise de texto e aplicações em RI |
 | **Pacotes** | `quanteda`, `quanteda.textstats`, `quanteda.textplots` |
-| **Dados** | Corpus de notícias coletado nas semanas anteriores |
+| **Dados** | Corpus de notícias coletado nas dias anteriores |
 
 ### Aula 13 — NLP com quanteda
 
@@ -217,7 +217,7 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 ---
 
-## Semana 8 — Projeto Final
+## Dia 8 — Projeto Final
 
 | | |
 |---|---|
@@ -240,12 +240,12 @@ O curso é estruturado em **8 semanas**, com **2 aulas por semana** (exceto sema
 
 | Data | Evento |
 |---|---|
-| Semana 1 | Início do curso — configuração do ambiente R + Quarto |
-| Semana 2 | Primeiro exercício avaliado: script de coleta via API |
-| Semana 4 | Proposta do trabalho individual (1 parágrafo + fonte) |
-| Semana 6 | ⚠️ Entrega do trabalho individual |
-| Semana 7 | Formação dos grupos e proposta do projeto final |
-| Semana 8 | ⚠️ Entrega e apresentação do projeto final |
+| Dia 1 | Início do curso — configuração do ambiente R + Quarto |
+| Dia 2 | Primeiro exercício avaliado: script de coleta via API |
+| Dia 4 | Proposta do trabalho individual (1 parágrafo + fonte) |
+| Dia 6 | ⚠️ Entrega do trabalho individual |
+| Dia 7 | Formação dos grupos e proposta do projeto final |
+| Dia 8 | ⚠️ Entrega e apresentação do projeto final |
 
 ---
 
@@ -260,5 +260,5 @@ Cada aula de 3 horas segue a estrutura:
 | 2 | 50 min | Demonstração ao vivo (código) |
 | 3 | 60 min | Exercício prático guiado |
 
-Os slides de cada aula estão disponíveis no menu **Semana X** da barra de navegação.
+Os slides de cada aula estão disponíveis no menu **Dia X** da barra de navegação.
 Os scripts comentados estão no menu **Scripts**.

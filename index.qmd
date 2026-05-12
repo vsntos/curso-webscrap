@@ -55,17 +55,17 @@ Aprenda a coletar, organizar e analisar dados digitais para pesquisa em RI — d
 
 ## Estrutura do curso
 
-O curso tem **15 aulas** organizadas em 8 semanas temáticas:
+O curso tem **15 aulas** organizadas em 8 dias temáticos:
 
-| Semana | Tema | Aulas |
+| Dia | Tema | Aulas |
 |--------|------|-------|
-| 1 | Fundamentos — dados digitais em RI, ética | 1–2 |
-| 2 | Web Foundations — HTML, CSS, HTTP, APIs | 3–4 |
-| 3–4 | Scraping Estático — rvest, limpeza, loops, robustez | 5–8 |
-| 5 | Scraping Dinâmico — JavaScript, Selenium | 9–10 |
-| 6 | Infraestrutura — organização, targets | 11–12 |
-| 7 | Texto e NLP — quanteda, framing, redes | 13–14 |
-| 8 | Projeto Final — apresentações | 15 |
+| Dia 1 | Fundamentos — dados digitais em RI, ética | 1–2 |
+| Dia 2 | Web Foundations — HTML, CSS, HTTP, APIs | 3–4 |
+| Dias 3-4 | Scraping Estático — rvest, limpeza, loops, robustez | 5–8 |
+| Dia 5 | Scraping Dinâmico — JavaScript, Selenium | 9–10 |
+| Dia 6 | Infraestrutura — organização, targets | 11–12 |
+| Dia 7 | Texto e NLP — quanteda, framing, redes | 13–14 |
+| Dia 8 | Projeto Final — apresentações | 15 |
 
 ---
 
@@ -86,8 +86,8 @@ install.packages(c(
 
 | Instrumento | Peso |
 |---|---|
-| Exercícios semanais | 20% |
-| Trabalho individual (entrega semana 6) | 30% |
+| Exercícios por aula | 20% |
+| Trabalho individual (entrega dia 6) | 30% |
 | Projeto final em grupo | 50% |
 
 ---
