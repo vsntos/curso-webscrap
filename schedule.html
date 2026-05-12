@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.5.57">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Cronograma – Web Scraping e Dados Digitais em RI</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark.min.css" rel="prefetch" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Web Scraping e Dados Digitais em RI</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./syllabus.html"> 
+<span class="menu-text">Ementa</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./schedule.html" aria-current="page"> 
+<span class="menu-text">Cronograma</span></a>
+  </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-semana-1-·-fundamentos" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Semana 1 · Fundamentos</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-semana-1-·-fundamentos">    
+        <li>
+    <a class="dropdown-item" href="./lectures/week01/aula01.html">
+ <span class="dropdown-text">Aula 1 — Dados Digitais em RI</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week01/aula02.html">
+ <span class="dropdown-text">Aula 2 — Ética e Legalidade</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-semana-2-·-web-foundations" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Semana 2 · Web Foundations</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-semana-2-·-web-foundations">    
+        <li>
+    <a class="dropdown-item" href="./lectures/week02/aula03.html">
+ <span class="dropdown-text">Aula 3 — HTML e CSS</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week02/aula04.html">
+ <span class="dropdown-text">Aula 4 — Requests HTTP</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-semanas-3–4-·-scraping-estático" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Semanas 3–4 · Scraping Estático</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-semanas-3–4-·-scraping-estático">    
+        <li>
+    <a class="dropdown-item" href="./lectures/week03/aula05.html">
+ <span class="dropdown-text">Aula 5 — Introdução ao rvest</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week03/aula06.html">
+ <span class="dropdown-text">Aula 6 — Estruturando Dados</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week04/aula07.html">
+ <span class="dropdown-text">Aula 7 — Paginação e Loops</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week04/aula08.html">
+ <span class="dropdown-text">Aula 8 — Robustez e Erros</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-semana-5-·-scraping-dinâmico" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Semana 5 · Scraping Dinâmico</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-semana-5-·-scraping-dinâmico">    
+        <li>
+    <a class="dropdown-item" href="./lectures/week05/aula09.html">
+ <span class="dropdown-text">Aula 9 — JavaScript e Conteúdo Dinâmico</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week05/aula10.html">
+ <span class="dropdown-text">Aula 10 — Automação com Selenium</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-semana-6-·-pipelines" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Semana 6 · Pipelines</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-semana-6-·-pipelines">    
+        <li>
+    <a class="dropdown-item" href="./lectures/week06/aula11.html">
+ <span class="dropdown-text">Aula 11 — Organização de Projetos</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week06/aula12.html">
+ <span class="dropdown-text">Aula 12 — Pipelines com targets</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-semana-7-·-texto-e-nlp" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Semana 7 · Texto e NLP</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-semana-7-·-texto-e-nlp">    
+        <li>
+    <a class="dropdown-item" href="./lectures/week07/aula13.html">
+ <span class="dropdown-text">Aula 13 — NLP com quanteda</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./lectures/week07/aula14.html">
+ <span class="dropdown-text">Aula 14 — Aplicações em RI</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-semana-8-·-projeto" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Semana 8 · Projeto</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-semana-8-·-projeto">    
+        <li>
+    <a class="dropdown-item" href="./lectures/week08/aula15.html">
+ <span class="dropdown-text">Aula 15 — Projeto Final</span></a>
+  </li>  
+    </ul>
+  </li>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-scripts" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Scripts</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-scripts">    
+        <li>
+    <a class="dropdown-item" href="./scripts/aula01_rss_google_news.R">
+ <span class="dropdown-text">Aula 1 — RSS Google News</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula02_apis_banco_mundial.R">
+ <span class="dropdown-text">Aula 2 — APIs Banco Mundial</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula03_html_css_estrutura.R">
+ <span class="dropdown-text">Aula 3 — HTML e CSS</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula04_requests_http.R">
+ <span class="dropdown-text">Aula 4 — Requests HTTP</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula05_scraping_rvest.R">
+ <span class="dropdown-text">Aula 5 — rvest</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula06_estruturando_dados.R">
+ <span class="dropdown-text">Aula 6 — Estruturando Dados</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula07_paginacao_loops.R">
+ <span class="dropdown-text">Aula 7 — Paginação</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula08_robustez_erros.R">
+ <span class="dropdown-text">Aula 8 — Robustez</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula09_javascript_dinamico.R">
+ <span class="dropdown-text">Aula 9 — JavaScript</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula10_selenium_automacao.R">
+ <span class="dropdown-text">Aula 10 — Selenium</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula11_organizacao_projetos.R">
+ <span class="dropdown-text">Aula 11 — Organização</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula12_pipelines_targets.R">
+ <span class="dropdown-text">Aula 12 — targets</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula13_nlp_quanteda.R">
+ <span class="dropdown-text">Aula 13 — NLP</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula14_aplicacoes_ri.R">
+ <span class="dropdown-text">Aula 14 — Aplicações RI</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./scripts/aula15_projeto_final_template.R">
+ <span class="dropdown-text">Aula 15 — Template Final</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#visão-geral" id="toc-visão-geral" class="nav-link active" data-scroll-target="#visão-geral">Visão Geral</a></li>
+  <li><a href="#semana-1-fundamentos-e-panorama" id="toc-semana-1-fundamentos-e-panorama" class="nav-link" data-scroll-target="#semana-1-fundamentos-e-panorama">Semana 1 — Fundamentos e Panorama</a>
+  <ul class="collapse">
+  <li><a href="#aula-1-dados-digitais-em-relações-internacionais" id="toc-aula-1-dados-digitais-em-relações-internacionais" class="nav-link" data-scroll-target="#aula-1-dados-digitais-em-relações-internacionais">Aula 1 — Dados Digitais em Relações Internacionais</a></li>
+  <li><a href="#aula-2-ética-legalidade-e-boas-práticas" id="toc-aula-2-ética-legalidade-e-boas-práticas" class="nav-link" data-scroll-target="#aula-2-ética-legalidade-e-boas-práticas">Aula 2 — Ética, Legalidade e Boas Práticas</a></li>
+  </ul></li>
+  <li><a href="#semana-2-web-foundations" id="toc-semana-2-web-foundations" class="nav-link" data-scroll-target="#semana-2-web-foundations">Semana 2 — Web Foundations</a>
+  <ul class="collapse">
+  <li><a href="#aula-3-html-e-css-a-estrutura-da-web" id="toc-aula-3-html-e-css-a-estrutura-da-web" class="nav-link" data-scroll-target="#aula-3-html-e-css-a-estrutura-da-web">Aula 3 — HTML e CSS: A Estrutura da Web</a></li>
+  <li><a href="#aula-4-requisições-http-e-apis" id="toc-aula-4-requisições-http-e-apis" class="nav-link" data-scroll-target="#aula-4-requisições-http-e-apis">Aula 4 — Requisições HTTP e APIs</a></li>
+  </ul></li>
+  <li><a href="#semanas-34-scraping-estático" id="toc-semanas-34-scraping-estático" class="nav-link" data-scroll-target="#semanas-34-scraping-estático">Semanas 3–4 — Scraping Estático</a>
+  <ul class="collapse">
+  <li><a href="#aula-5-introdução-ao-rvest" id="toc-aula-5-introdução-ao-rvest" class="nav-link" data-scroll-target="#aula-5-introdução-ao-rvest">Aula 5 — Introdução ao rvest</a></li>
+  <li><a href="#aula-6-estruturando-e-limpando-dados" id="toc-aula-6-estruturando-e-limpando-dados" class="nav-link" data-scroll-target="#aula-6-estruturando-e-limpando-dados">Aula 6 — Estruturando e Limpando Dados</a></li>
+  <li><a href="#aula-7-paginação-e-automação-com-loops" id="toc-aula-7-paginação-e-automação-com-loops" class="nav-link" data-scroll-target="#aula-7-paginação-e-automação-com-loops">Aula 7 — Paginação e Automação com Loops</a></li>
+  <li><a href="#aula-8-robustez-e-tratamento-de-erros" id="toc-aula-8-robustez-e-tratamento-de-erros" class="nav-link" data-scroll-target="#aula-8-robustez-e-tratamento-de-erros">Aula 8 — Robustez e Tratamento de Erros</a></li>
+  </ul></li>
+  <li><a href="#semana-5-scraping-dinâmico" id="toc-semana-5-scraping-dinâmico" class="nav-link" data-scroll-target="#semana-5-scraping-dinâmico">Semana 5 — Scraping Dinâmico</a>
+  <ul class="collapse">
+  <li><a href="#aula-9-javascript-e-conteúdo-dinâmico" id="toc-aula-9-javascript-e-conteúdo-dinâmico" class="nav-link" data-scroll-target="#aula-9-javascript-e-conteúdo-dinâmico">Aula 9 — JavaScript e Conteúdo Dinâmico</a></li>
+  <li><a href="#aula-10-automação-com-selenium" id="toc-aula-10-automação-com-selenium" class="nav-link" data-scroll-target="#aula-10-automação-com-selenium">Aula 10 — Automação com Selenium</a></li>
+  </ul></li>
+  <li><a href="#semana-6" id="toc-semana-6" class="nav-link" data-scroll-target="#semana-6">Semana 6 — Infraestrutura e Reprodutibilidade</a>
+  <ul class="collapse">
+  <li><a href="#aula-11-organização-de-projetos" id="toc-aula-11-organização-de-projetos" class="nav-link" data-scroll-target="#aula-11-organização-de-projetos">Aula 11 — Organização de Projetos</a></li>
+  <li><a href="#aula-12-pipelines-com-targets" id="toc-aula-12-pipelines-com-targets" class="nav-link" data-scroll-target="#aula-12-pipelines-com-targets">Aula 12 — Pipelines com targets</a></li>
+  </ul></li>
+  <li><a href="#semana-7-texto-e-nlp" id="toc-semana-7-texto-e-nlp" class="nav-link" data-scroll-target="#semana-7-texto-e-nlp">Semana 7 — Texto e NLP</a>
+  <ul class="collapse">
+  <li><a href="#aula-13-nlp-com-quanteda" id="toc-aula-13-nlp-com-quanteda" class="nav-link" data-scroll-target="#aula-13-nlp-com-quanteda">Aula 13 — NLP com quanteda</a></li>
+  <li><a href="#aula-14-aplicações-em-ri" id="toc-aula-14-aplicações-em-ri" class="nav-link" data-scroll-target="#aula-14-aplicações-em-ri">Aula 14 — Aplicações em RI</a></li>
+  </ul></li>
+  <li><a href="#semana-8-projeto-final" id="toc-semana-8-projeto-final" class="nav-link" data-scroll-target="#semana-8-projeto-final">Semana 8 — Projeto Final</a>
+  <ul class="collapse">
+  <li><a href="#aula-15-apresentações-e-encerramento" id="toc-aula-15-apresentações-e-encerramento" class="nav-link" data-scroll-target="#aula-15-apresentações-e-encerramento">Aula 15 — Apresentações e Encerramento</a></li>
+  </ul></li>
+  <li><a href="#datas-e-prazos" id="toc-datas-e-prazos" class="nav-link" data-scroll-target="#datas-e-prazos">Datas e Prazos</a></li>
+  <li><a href="#formato-das-aulas" id="toc-formato-das-aulas" class="nav-link" data-scroll-target="#formato-das-aulas">Formato das Aulas</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Cronograma</h1>
+<p class="subtitle lead">Web Scraping e Dados Digitais em Relações Internacionais · 2026</p>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="visão-geral" class="level2">
+<h2 class="anchored" data-anchor-id="visão-geral">Visão Geral</h2>
+<p>O curso é estruturado em <strong>8 semanas</strong>, com <strong>2 aulas por semana</strong> (exceto semana 8), totalizando 15 aulas de 3 horas cada.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Entrega do trabalho individual:</strong> ao final da Semana 6 (após Aula 12). <strong>Apresentações do projeto final:</strong> Aula 15.</p>
+</div>
+</div>
+<hr>
+</section>
+<section id="semana-1-fundamentos-e-panorama" class="level2">
+<h2 class="anchored" data-anchor-id="semana-1-fundamentos-e-panorama">Semana 1 — Fundamentos e Panorama</h2>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Tema</strong></td>
+<td>Dados Digitais em RI; Ética e Legalidade</td>
+</tr>
+<tr class="even">
+<td><strong>Pacotes</strong></td>
+<td><code>tidyverse</code>, <code>httr2</code>, <code>jsonlite</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Dados</strong></td>
+<td>RSS Google News, API Banco Mundial</td>
+</tr>
+</tbody>
+</table>
+<section id="aula-1-dados-digitais-em-relações-internacionais" class="level3">
+<h3 class="anchored" data-anchor-id="aula-1-dados-digitais-em-relações-internacionais">Aula 1 — Dados Digitais em Relações Internacionais</h3>
+<ul>
+<li>Por que dados digitais importam para a pesquisa em RI</li>
+<li>Tipologia de fontes: APIs, portais, feeds RSS, redes sociais</li>
+<li>Ambiente R + Quarto: configuração e primeiro projeto</li>
+<li><strong>Exercício:</strong> coletar e explorar RSS do Google News Brasil</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula01_rss_google_news.R</code></p>
+</section>
+<section id="aula-2-ética-legalidade-e-boas-práticas" class="level3">
+<h3 class="anchored" data-anchor-id="aula-2-ética-legalidade-e-boas-práticas">Aula 2 — Ética, Legalidade e Boas Práticas</h3>
+<ul>
+<li>Robots.txt, Termos de Serviço, LGPD</li>
+<li>Rate limiting e comportamento respeitoso</li>
+<li>APIs institucionais: Banco Mundial, GDELT, IBGE</li>
+<li><strong>Exercício:</strong> explorar API do Banco Mundial com <code>httr2</code></li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula02_apis_banco_mundial.R</code></p>
+<hr>
+</section>
+</section>
+<section id="semana-2-web-foundations" class="level2">
+<h2 class="anchored" data-anchor-id="semana-2-web-foundations">Semana 2 — Web Foundations</h2>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Tema</strong></td>
+<td>HTML, CSS e Requisições HTTP</td>
+</tr>
+<tr class="even">
+<td><strong>Pacotes</strong></td>
+<td><code>rvest</code>, <code>httr2</code>, <code>xml2</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Dados</strong></td>
+<td>Portais de notícias, Banco Mundial, GDELT</td>
+</tr>
+</tbody>
+</table>
+<section id="aula-3-html-e-css-a-estrutura-da-web" class="level3">
+<h3 class="anchored" data-anchor-id="aula-3-html-e-css-a-estrutura-da-web">Aula 3 — HTML e CSS: A Estrutura da Web</h3>
+<ul>
+<li>Anatomia de uma página HTML: tags, atributos, árvore DOM</li>
+<li>CSS selectors: classe, id, descendência, pseudo-classes</li>
+<li>DevTools do navegador: inspeção e cópia de seletores</li>
+<li>XPath básico como alternativa</li>
+<li><strong>Exercício:</strong> mapear seletores de três portais de RI</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula03_html_css_estrutura.R</code></p>
+</section>
+<section id="aula-4-requisições-http-e-apis" class="level3">
+<h3 class="anchored" data-anchor-id="aula-4-requisições-http-e-apis">Aula 4 — Requisições HTTP e APIs</h3>
+<ul>
+<li>Protocolo HTTP: verbos, cabeçalhos, status codes</li>
+<li>Pacote <code>httr2</code>: construir, executar e processar requisições</li>
+<li>APIs RESTful e formato JSON</li>
+<li>Autenticação: API keys e .Renviron</li>
+<li><strong>Exercício:</strong> coletar dados do Banco Mundial e GDELT</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula04_requests_http.R</code></p>
+<hr>
+</section>
+</section>
+<section id="semanas-34-scraping-estático" class="level2">
+<h2 class="anchored" data-anchor-id="semanas-34-scraping-estático">Semanas 3–4 — Scraping Estático</h2>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Tema</strong></td>
+<td>rvest, limpeza, paginação e robustez</td>
+</tr>
+<tr class="even">
+<td><strong>Pacotes</strong></td>
+<td><code>rvest</code>, <code>stringr</code>, <code>lubridate</code>, <code>purrr</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Dados</strong></td>
+<td>Agência Brasil, ONU Brasil, portais nacionais</td>
+</tr>
+</tbody>
+</table>
+<section id="aula-5-introdução-ao-rvest" class="level3">
+<h3 class="anchored" data-anchor-id="aula-5-introdução-ao-rvest">Aula 5 — Introdução ao rvest</h3>
+<ul>
+<li>Workflow: <code>read_html</code> → <code>html_elements</code> → <code>html_text2</code>/<code>html_attr</code></li>
+<li>Scraping de listas, parágrafos e tabelas</li>
+<li>Atributos: <code>href</code>, <code>src</code>, datas em <code>&lt;time&gt;</code></li>
+<li>SelectorGadget para identificação rápida</li>
+<li><strong>Exercício:</strong> scraping completo da Agência Brasil</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula05_scraping_rvest.R</code></p>
+</section>
+<section id="aula-6-estruturando-e-limpando-dados" class="level3">
+<h3 class="anchored" data-anchor-id="aula-6-estruturando-e-limpando-dados">Aula 6 — Estruturando e Limpando Dados</h3>
+<ul>
+<li>Combinar páginas com <code>bind_rows</code> e listas</li>
+<li>Limpeza: <code>str_squish</code>, <code>str_remove</code>, regex para RI</li>
+<li>Normalização de datas e enriquecimento com variáveis derivadas</li>
+<li>Deduplicação e validação</li>
+<li><strong>Exercício:</strong> construir dataset limpo de 100+ notícias</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula06_estruturando_dados.R</code></p>
+</section>
+<section id="aula-7-paginação-e-automação-com-loops" class="level3">
+<h3 class="anchored" data-anchor-id="aula-7-paginação-e-automação-com-loops">Aula 7 — Paginação e Automação com Loops</h3>
+<ul>
+<li>Padrões de URL: <code>?page=</code>, <code>?offset=</code>, <code>/pagina/</code></li>
+<li><code>for</code> loops vs <code>purrr::map_dfr</code></li>
+<li>Raspar até página vazia com <code>while</code></li>
+<li>Seguir links internos e rastrear aulas</li>
+<li><strong>Exercício:</strong> coletar múltiplos portais com loop paginado</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula07_paginacao_loops.R</code></p>
+</section>
+<section id="aula-8-robustez-e-tratamento-de-erros" class="level3">
+<h3 class="anchored" data-anchor-id="aula-8-robustez-e-tratamento-de-erros">Aula 8 — Robustez e Tratamento de Erros</h3>
+<ul>
+<li><code>tryCatch</code>, <code>possibly</code>, <code>safely</code></li>
+<li>Retry com backoff exponencial</li>
+<li>Logging estruturado em arquivo</li>
+<li>Timeout, codificação, validação de dados coletados</li>
+<li><strong>Exercício:</strong> scraper robusto com log e relatório de execução</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula08_robustez_erros.R</code></p>
+<hr>
+</section>
+</section>
+<section id="semana-5-scraping-dinâmico" class="level2">
+<h2 class="anchored" data-anchor-id="semana-5-scraping-dinâmico">Semana 5 — Scraping Dinâmico</h2>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Tema</strong></td>
+<td>JavaScript, APIs ocultas e Selenium</td>
+</tr>
+<tr class="even">
+<td><strong>Pacotes</strong></td>
+<td><code>chromote</code>, <code>RSelenium</code>, <code>httr2</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Dados</strong></td>
+<td>Portais com JavaScript, GDELT streaming</td>
+</tr>
+</tbody>
+</table>
+<section id="aula-9-javascript-e-conteúdo-dinâmico" class="level3">
+<h3 class="anchored" data-anchor-id="aula-9-javascript-e-conteúdo-dinâmico">Aula 9 — JavaScript e Conteúdo Dinâmico</h3>
+<ul>
+<li>Estático vs dinâmico: como identificar</li>
+<li>DevTools → aba Network: interceptar requisições</li>
+<li>APIs ocultas: replicar AJAX com <code>httr2</code></li>
+<li><code>chromote</code> para renderização JavaScript</li>
+<li><strong>Exercício:</strong> capturar API oculta de portal de notícias</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula09_javascript_dinamico.R</code></p>
+</section>
+<section id="aula-10-automação-com-selenium" class="level3">
+<h3 class="anchored" data-anchor-id="aula-10-automação-com-selenium">Aula 10 — Automação com Selenium</h3>
+<ul>
+<li>Arquitetura RSelenium: driver, navegador, sessão</li>
+<li><code>findElement</code>, <code>sendKeysToElement</code>, <code>clickElement</code></li>
+<li>Scroll infinito e paginação por clique</li>
+<li>Login automatizado e espera condicional</li>
+<li><strong>Exercício:</strong> scraping de portal com login e scroll infinito</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula10_selenium_automacao.R</code></p>
+<hr>
+</section>
+</section>
+<section id="semana-6" class="level2">
+<h2 class="anchored" data-anchor-id="semana-6">Semana 6 — Infraestrutura e Reprodutibilidade</h2>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Tema</strong></td>
+<td>Organização de projetos e pipelines</td>
+</tr>
+<tr class="even">
+<td><strong>Pacotes</strong></td>
+<td><code>fs</code>, <code>renv</code>, <code>targets</code>, <code>tarchetypes</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Entrega</strong></td>
+<td>⚠️ Trabalho individual ao final desta semana</td>
+</tr>
+</tbody>
+</table>
+<section id="aula-11-organização-de-projetos" class="level3">
+<h3 class="anchored" data-anchor-id="aula-11-organização-de-projetos">Aula 11 — Organização de Projetos</h3>
+<ul>
+<li>Estrutura de pastas: <code>raw/</code>, <code>processed/</code>, <code>scripts/</code>, <code>outputs/</code></li>
+<li>Convenções de nomenclatura e versionamento de arquivos</li>
+<li><code>.Renviron</code> para segredos; <code>renv</code> para ambientes</li>
+<li><code>.gitignore</code> para projetos de dados; README automático</li>
+<li><strong>Exercício:</strong> reorganizar projeto pessoal com <code>fs</code></li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula11_organizacao_projetos.R</code></p>
+</section>
+<section id="aula-12-pipelines-com-targets" class="level3">
+<h3 class="anchored" data-anchor-id="aula-12-pipelines-com-targets">Aula 12 — Pipelines com targets</h3>
+<ul>
+<li>Pipeline declarativa vs scripts sequenciais</li>
+<li>Estrutura de <code>_targets.R</code>; <code>tar_target</code>, <code>tar_make</code>, <code>tar_read</code></li>
+<li>Cache inteligente e rastreamento de dependências</li>
+<li><code>format = "url"</code> para monitorar mudanças em páginas</li>
+<li>Integração com Quarto: relatório automático ao rodar pipeline</li>
+<li><strong>Exercício:</strong> converter projeto em pipeline targets</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula12_pipelines_targets.R</code></p>
+<blockquote class="blockquote">
+<p><strong>⚠️ Trabalho individual:</strong> entregar até domingo ao final desta semana.</p>
+</blockquote>
+<hr>
+</section>
+</section>
+<section id="semana-7-texto-e-nlp" class="level2">
+<h2 class="anchored" data-anchor-id="semana-7-texto-e-nlp">Semana 7 — Texto e NLP</h2>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Tema</strong></td>
+<td>Análise de texto e aplicações em RI</td>
+</tr>
+<tr class="even">
+<td><strong>Pacotes</strong></td>
+<td><code>quanteda</code>, <code>quanteda.textstats</code>, <code>quanteda.textplots</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Dados</strong></td>
+<td>Corpus de notícias coletado nas semanas anteriores</td>
+</tr>
+</tbody>
+</table>
+<section id="aula-13-nlp-com-quanteda" class="level3">
+<h3 class="anchored" data-anchor-id="aula-13-nlp-com-quanteda">Aula 13 — NLP com quanteda</h3>
+<ul>
+<li>Corpus, tokens, DFM (Document-Feature Matrix)</li>
+<li>Stopwords em português e normalização</li>
+<li>Keyness: termos distintivos entre grupos de documentos</li>
+<li>Redes de co-ocorrência (FCM)</li>
+<li>Dicionários temáticos e análise de sentimento</li>
+<li><strong>Exercício:</strong> análise comparativa de dois portais de RI</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula13_nlp_quanteda.R</code></p>
+</section>
+<section id="aula-14-aplicações-em-ri" class="level3">
+<h3 class="anchored" data-anchor-id="aula-14-aplicações-em-ri">Aula 14 — Aplicações em RI</h3>
+<ul>
+<li>Análise de framing com keyness por portal/período</li>
+<li>Agenda-setting: comparar ênfases temáticas</li>
+<li>GDELT: tom e volume de cobertura de eventos internacionais</li>
+<li>Redes de co-menção entre atores internacionais com <code>igraph</code></li>
+<li>Integração com dados econômicos do Banco Mundial</li>
+<li><strong>Exercício:</strong> analisar framing de tema de RI nos últimos 6 meses</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula14_aplicacoes_ri.R</code></p>
+<hr>
+</section>
+</section>
+<section id="semana-8-projeto-final" class="level2">
+<h2 class="anchored" data-anchor-id="semana-8-projeto-final">Semana 8 — Projeto Final</h2>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Tema</strong></td>
+<td>Consolidação e apresentações</td>
+</tr>
+<tr class="even">
+<td><strong>Entrega</strong></td>
+<td>Projeto final completo</td>
+</tr>
+</tbody>
+</table>
+<section id="aula-15-apresentações-e-encerramento" class="level3">
+<h3 class="anchored" data-anchor-id="aula-15-apresentações-e-encerramento">Aula 15 — Apresentações e Encerramento</h3>
+<ul>
+<li>Apresentações dos grupos (15 min + 5 min perguntas)</li>
+<li>Checklist de reprodutibilidade: o projeto roda no computador do avaliador?</li>
+<li>Discussão de limitações, vieses e extensões</li>
+<li>Próximos passos: publicação, expansão, integração com outras técnicas</li>
+<li><strong>Entrega:</strong> repositório Git + relatório Quarto renderizado</li>
+</ul>
+<p><strong>Script:</strong> <code>scripts/aula15_projeto_final_template.R</code></p>
+<hr>
+</section>
+</section>
+<section id="datas-e-prazos" class="level2">
+<h2 class="anchored" data-anchor-id="datas-e-prazos">Datas e Prazos</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Data</th>
+<th>Evento</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Semana 1</td>
+<td>Início do curso — configuração do ambiente R + Quarto</td>
+</tr>
+<tr class="even">
+<td>Semana 2</td>
+<td>Primeiro exercício avaliado: script de coleta via API</td>
+</tr>
+<tr class="odd">
+<td>Semana 4</td>
+<td>Proposta do trabalho individual (1 parágrafo + fonte)</td>
+</tr>
+<tr class="even">
+<td>Semana 6</td>
+<td>⚠️ Entrega do trabalho individual</td>
+</tr>
+<tr class="odd">
+<td>Semana 7</td>
+<td>Formação dos grupos e proposta do projeto final</td>
+</tr>
+<tr class="even">
+<td>Semana 8</td>
+<td>⚠️ Entrega e apresentação do projeto final</td>
+</tr>
+</tbody>
+</table>
+<hr>
+</section>
+<section id="formato-das-aulas" class="level2">
+<h2 class="anchored" data-anchor-id="formato-das-aulas">Formato das Aulas</h2>
+<p>Cada aula de 3 horas segue a estrutura:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Bloco</th>
+<th>Duração</th>
+<th>Conteúdo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>60 min</td>
+<td>Exposição teórico-conceitual (slides)</td>
+</tr>
+<tr class="even">
+<td>Intervalo</td>
+<td>10 min</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>50 min</td>
+<td>Demonstração ao vivo (código)</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>60 min</td>
+<td>Exercício prático guiado</td>
+</tr>
+</tbody>
+</table>
+<p>Os slides de cada aula estão disponíveis no menu <strong>Semana X</strong> da barra de navegação. Os scripts comentados estão no menu <strong>Scripts</strong>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const disableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'prefetch';
+    }
+  }
+  const enableStylesheet = (stylesheets) => {
+    for (let i=0; i < stylesheets.length; i++) {
+      const stylesheet = stylesheets[i];
+      stylesheet.rel = 'stylesheet';
+    }
+  }
+  const manageTransitions = (selector, allowTransitions) => {
+    const els = window.document.querySelectorAll(selector);
+    for (let i=0; i < els.length; i++) {
+      const el = els[i];
+      if (allowTransitions) {
+        el.classList.remove('notransition');
+      } else {
+        el.classList.add('notransition');
+      }
+    }
+  }
+  const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+    const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+    const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+    let newTheme = '';
+    if(darkModeDefault) {
+      newTheme = isAlternate ? baseTheme : alternateTheme;
+    } else {
+      newTheme = isAlternate ? alternateTheme : baseTheme;
+    }
+    const changeGiscusTheme = () => {
+      // From: https://github.com/giscus/giscus/issues/336
+      const sendMessage = (message) => {
+        const iframe = document.querySelector('iframe.giscus-frame');
+        if (!iframe) return;
+        iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+      }
+      sendMessage({
+        setConfig: {
+          theme: newTheme
+        }
+      });
+    }
+    const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+    if (isGiscussLoaded) {
+      changeGiscusTheme();
+    }
+  }
+  const toggleColorMode = (alternate) => {
+    // Switch the stylesheets
+    const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+    manageTransitions('#quarto-margin-sidebar .nav-link', false);
+    if (alternate) {
+      enableStylesheet(alternateStylesheets);
+      for (const sheetNode of alternateStylesheets) {
+        if (sheetNode.id === "quarto-bootstrap") {
+          toggleBodyColorMode(sheetNode);
+        }
+      }
+    } else {
+      disableStylesheet(alternateStylesheets);
+      toggleBodyColorPrimary();
+    }
+    manageTransitions('#quarto-margin-sidebar .nav-link', true);
+    // Switch the toggles
+    const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+    for (let i=0; i < toggles.length; i++) {
+      const toggle = toggles[i];
+      if (toggle) {
+        if (alternate) {
+          toggle.classList.add("alternate");     
+        } else {
+          toggle.classList.remove("alternate");
+        }
+      }
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455)
+    if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+      manageTransitions("body", false);
+      window.scrollTo(0, 1);
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        manageTransitions("body", true);
+      }, 40);  
+    }
+  }
+  const isFileUrl = () => { 
+    return window.location.protocol === 'file:';
+  }
+  const hasAlternateSentinel = () => {  
+    let styleSentinel = getColorSchemeSentinel();
+    if (styleSentinel !== null) {
+      return styleSentinel === "alternate";
+    } else {
+      return false;
+    }
+  }
+  const setStyleSentinel = (alternate) => {
+    const value = alternate ? "alternate" : "default";
+    if (!isFileUrl()) {
+      window.localStorage.setItem("quarto-color-scheme", value);
+    } else {
+      localAlternateSentinel = value;
+    }
+  }
+  const getColorSchemeSentinel = () => {
+    if (!isFileUrl()) {
+      const storageValue = window.localStorage.getItem("quarto-color-scheme");
+      return storageValue != null ? storageValue : localAlternateSentinel;
+    } else {
+      return localAlternateSentinel;
+    }
+  }
+  const darkModeDefault = false;
+  let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+  // Dark / light mode switch
+  window.quartoToggleColorScheme = () => {
+    // Read the current dark / light value 
+    let toAlternate = !hasAlternateSentinel();
+    toggleColorMode(toAlternate);
+    setStyleSentinel(toAlternate);
+    toggleGiscusIfUsed(toAlternate, darkModeDefault);
+  };
+  // Ensure there is a toggle, if there isn't float one in the top right
+  if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+    const a = window.document.createElement('a');
+    a.classList.add('top-right');
+    a.classList.add('quarto-color-scheme-toggle');
+    a.href = "";
+    a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+    const i = window.document.createElement("i");
+    i.classList.add('bi');
+    a.appendChild(i);
+    window.document.body.appendChild(a);
+  }
+  // Switch to dark mode if need be
+  if (hasAlternateSentinel()) {
+    toggleColorMode(true);
+  } else {
+    toggleColorMode(false);
+  }
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/vsntos\.github\.io\/curso-webscrap\/");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>© 2026 Vinicius Santos · PPGRI</p>
+</div>   
+    <div class="nav-footer-center">
+<p>Web Scraping e Dados Digitais em RI</p>
+</div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
