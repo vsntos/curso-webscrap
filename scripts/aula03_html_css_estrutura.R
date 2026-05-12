@@ -325,20 +325,26 @@ url_senado <- "https://www12.senado.leg.br/noticias"
 pagina_senado <- tryCatch(
   {
     Sys.sleep(1)
-    read_html(url_senado)
+    request(url_senado) |>
+      req_headers("User-Agent" = "Mozilla/5.0") |>
+      req_perform() |>
+      resp_body_html()
   },
   error = function(e) NULL
 )
 
 if (!is.null(pagina_senado)) {
 
-  # Procurar títulos de notícias
-  # (a estrutura pode variar — inspecione antes)
-  possiveis_titulos <- pagina_senado |>
-    html_elements("h3") |>
-    html_text2()
+  # O Senado usa <article><a> para cada manchete
+  # h3 não aparece nesta página — o seletor correto é "article a"
+  noticias_senado <- pagina_senado |>
+    html_elements("article a")
 
-  head(possiveis_titulos, 5)
+  titulos <- html_text2(noticias_senado)
+  links   <- paste0("https://www12.senado.leg.br",
+                    html_attr(noticias_senado, "href"))
+
+  data.frame(titulo = titulos, url = links)
 
 }
 
