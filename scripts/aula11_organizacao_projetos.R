@@ -526,7 +526,7 @@ gerar_readme(
     "Google News RSS"
   ),
   periodo_coleta = "Jan/2025 – Mai/2026",
-  autor          = "Vinicius Santos, Data Mundi"
+  autor          = "Vinicius Santos, PPGRI"
 )
 
 cat(readLines("README.md"), sep = "\n")
