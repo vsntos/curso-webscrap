@@ -430,30 +430,32 @@ resp_invalido <- request(
 resp_status(resp_invalido)
 
 # =========================================================
-# 16. INSPECIONANDO UMA API DE EVENTOS
+# 16. INSPECIONANDO UMA API DE NOTICIAS INTERNACIONAIS
 # =========================================================
 #
-# GDELT Project API
+# The Guardian Open Platform
 #
-# Uma das maiores bases de eventos internacionais.
-# Gratuita, sem autenticação.
+# API gratuita de um dos maiores jornais do mundo.
+# Cobertura extensa de temas de RI: diplomacia, conflitos,
+# política internacional, clima, economia global.
 #
-# Documentação:
-# https://blog.gdeltproject.org/gdelt-2-0-our-global-graph/
+# Chave "test" permite buscas sem cadastro (limite de taxa).
+# Para uso intensivo: registre-se em:
+# https://open-platform.theguardian.com/access/
 #
 # =========================================================
 
-url_gdelt <- paste0(
-  "https://api.gdeltproject.org/api/v2/doc/doc",
-  "?query=Brazil+diplomacy",
-  "&mode=artlist",
-  "&maxrecords=10",
-  "&format=json"
+url_guardian <- paste0(
+  "https://content.guardianapis.com/search",
+  "?q=Brazil+diplomacy",
+  "&show-fields=headline,trailText,webPublicationDate",
+  "&page-size=10",
+  "&api-key=test"
 )
 
-resp_gdelt <- tryCatch(
+resp_guardian <- tryCatch(
   {
-    request(url_gdelt) |>
+    request(url_guardian) |>
       req_user_agent("Curso Web Scraping em RI") |>
       req_timeout(10) |>
       req_perform()
@@ -461,14 +463,18 @@ resp_gdelt <- tryCatch(
   error = function(e) NULL
 )
 
-if (!is.null(resp_gdelt) && resp_status(resp_gdelt) == 200) {
+if (!is.null(resp_guardian) && resp_status(resp_guardian) == 200) {
 
-  gdelt_dados <- resp_gdelt |>
+  guardian_dados <- resp_guardian |>
     resp_body_string() |>
     fromJSON()
 
-  # Ver estrutura
-  str(gdelt_dados, max.level = 2)
+  # Estrutura da resposta
+  str(guardian_dados$response, max.level = 2)
+
+  # Tabela com manchetes e datas
+  resultados <- guardian_dados$response$results
+  resultados[, c("webTitle", "webPublicationDate", "webUrl")]
 
 }
 
