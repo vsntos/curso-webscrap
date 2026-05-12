@@ -8,7 +8,7 @@ subtitle: "Web Scraping e Dados Digitais em Relações Internacionais"
 | | |
 |---|---|
 | **Disciplina** | Web Scraping e Dados Digitais em Relações Internacionais |
-| **Programa** | PPGRI — Programa de Pós-Graduação em Relações Internacionais |
+| **Laboratório** | Data Mundi |
 | **Nível** | Mestrado / Doutorado |
 | **Carga horária** | 45h (15 aulas de 3h) |
 | **Modalidade** | Presencial com materiais digitais abertos |
@@ -133,7 +133,6 @@ Estrutura do projeto entregável. Checklist de reprodutibilidade. Apresentaçõe
 
 - Grimmer, J.; Roberts, M.; Stewart, B. *Text as Data*. Princeton UP, 2022.
 - Leetaru, K.; Schrodt, P. A. "GDELT: Global Data on Events, Location and Tone." *ISA Annual Convention*, 2013.
-- King, G.; Pan, J.; Roberts, M. "How Censorship in China Allows Government Criticism but Silences Collective Expression." *APSR*, 2013.
 
 ### Reprodutibilidade
 

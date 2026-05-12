@@ -107,14 +107,25 @@ body {
   font-weight: 600;
 }
 
-// Inline code
-code {
+// Inline code — funciona em modo claro e escuro
+code:not(pre > code) {
   font-family: $font-family-monospace;
   font-size: 0.88em;
-  color: darken($secondary, 10%);
-  background: $light-bg;
-  padding: 0.1em 0.3em;
-  border-radius: 3px;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+// Modo claro
+[data-bs-theme="light"] code:not(pre > code),
+body:not([data-bs-theme="dark"]) code:not(pre > code) {
+  color: #c7254e;
+  background: #f9f2f4;
+}
+
+// Modo escuro
+[data-bs-theme="dark"] code:not(pre > code) {
+  color: #e8a0b4;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 // Custom callout colours

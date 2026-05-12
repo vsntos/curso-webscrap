@@ -1,6 +1,6 @@
 ---
 title: "Cronograma"
-subtitle: "Web Scraping e Dados Digitais em Relações Internacionais · 2026"
+subtitle: "Laboratório Data Mundi · 2026"
 ---
 
 ## Visão Geral
