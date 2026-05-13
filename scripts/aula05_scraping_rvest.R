@@ -206,7 +206,7 @@ if (!is.null(pagina_ab)) {
 #
 # =========================================================
 
-extrair_noticias <- function(url, seletor_titulo = "h2") {
+extrair_noticias <- function(url) {
 
   # Respeitar o servidor
   Sys.sleep(1.5)
@@ -222,38 +222,37 @@ extrair_noticias <- function(url, seletor_titulo = "h2") {
 
   # Retornar vazio se falhou
   if (is.null(pagina)) {
-    return(tibble(
-      titulo   = character(),
-      link     = character(),
-      url_base = character()
-    ))
+    return(tibble(titulo = character(), link = character(), url_base = character()))
   }
 
-  # Extrair títulos
-  titulos <- pagina |>
-    html_elements(seletor_titulo) |>
-    html_text2() |>
-    str_squish()
+  # Na Agência Brasil, títulos e links são elementos separados:
+  # não há <a> dentro de <h2>. Extraímos pelo padrão da URL.
+  nos <- pagina |> html_elements("a[href*='/internacional/noticia/']")
 
-  # Extrair links
-  links <- pagina |>
-    html_elements(paste0(seletor_titulo, " a")) |>
-    html_attr("href")
+  if (length(nos) == 0) {
+    return(tibble(titulo = character(), link = character(), url_base = character()))
+  }
 
-  # Garantir mesmo comprimento
-  n <- min(length(titulos), length(links))
+  links   <- nos |> html_attr("href")
+  titulos <- nos |> html_text2() |> str_squish()
 
-  if (n == 0) {
-    return(tibble(
-      titulo   = character(),
-      link     = character(),
-      url_base = character()
-    ))
+  # Remove textos curtos e artefatos do CMS (scald=...)
+  validos <- nchar(titulos) > 20 & !grepl("^scald=", titulos)
+  links   <- links[validos]
+  titulos <- titulos[validos]
+
+  # Deduplica por link
+  idx     <- !duplicated(links)
+  links   <- links[idx]
+  titulos <- titulos[idx]
+
+  if (length(links) == 0) {
+    return(tibble(titulo = character(), link = character(), url_base = character()))
   }
 
   tibble(
-    titulo   = titulos[1:n],
-    link     = links[1:n],
+    titulo   = titulos,
+    link     = paste0("https://agenciabrasil.ebc.com.br", links),
     url_base = url
   )
 }
