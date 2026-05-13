@@ -266,33 +266,36 @@ resultado <- extrair_noticias(
 resultado
 
 # =========================================================
-# 10. SCRAPING DA ONU BRASIL
+# 10. SCRAPING DA AGÊNCIA BRASIL - INTERNACIONAL
 # =========================================================
+#
+# Nota: o antigo endereço brasil.un.org/pt-br/news
+# retorna 404. Substituímos pela editoria Internacional
+# da Agência Brasil (EBC), que cobre os mesmos temas
+# com conteúdo em português e acesso livre.
+#
+# Seletor correto: "h2" (não "h3")
+#
 
-url_onu <- "https://brasil.un.org/pt-br/news"
+url_internacional <- "https://agenciabrasil.ebc.com.br/internacional"
 
-pagina_onu <- tryCatch(
+pagina_int <- tryCatch(
   {
     Sys.sleep(1)
-    read_html(url_onu)
+    read_html(url_internacional)
   },
   error = function(e) NULL
 )
 
-if (!is.null(pagina_onu)) {
+if (!is.null(pagina_int)) {
 
-  titulos_onu <- pagina_onu |>
-    html_elements("h3") |>
+  titulos_int <- pagina_int |>
+    html_elements("h2") |>
     html_text2() |>
-    str_squish()
+    str_squish() |>
+    (\(x) x[nchar(x) > 15])()   # remove títulos de seção curtos
 
-  datas_onu <- pagina_onu |>
-    html_elements("time") |>
-    html_text2() |>
-    str_squish()
-
-  head(titulos_onu, 5)
-  head(datas_onu, 5)
+  head(titulos_int, 5)
 
 }
 
@@ -540,8 +543,8 @@ diagnosticar_pagina("https://agenciabrasil.ebc.com.br/internacional")
 #
 # 1. Escolha um portal:
 #    - https://agenciabrasil.ebc.com.br/internacional
-#    - https://brasil.un.org/pt-br/news
 #    - https://www.bbc.com/portuguese/internacional
+#    - https://www.dw.com/pt-br/not%C3%ADcias/s-7111
 #
 # 2. Inspecione a estrutura HTML (F12);
 #
