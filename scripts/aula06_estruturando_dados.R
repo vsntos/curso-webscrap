@@ -312,21 +312,34 @@ raspar_agencia_brasil <- function(pagina_num) {
 
   if (is.null(pagina)) return(tibble())
 
-  titulos <- pagina |>
-    html_elements("h2") |>
-    html_text2() |>
-    str_squish()
+  # Na Agência Brasil, títulos (h2) e links (a) são elementos
+  # separados — não há <a> dentro de <h2>.
+  # Extraímos os links pelo padrão de URL das notícias
+  # e os textos pelos próprios elementos <a>.
 
-  links <- pagina |>
-    html_elements("h2 a") |>
-    html_attr("href")
+  nos_links <- pagina |>
+    html_elements("a[href*='/internacional/noticia/']")
 
-  n <- min(length(titulos), length(links))
-  if (n == 0) return(tibble())
+  if (length(nos_links) == 0) return(tibble())
+
+  links  <- nos_links |> html_attr("href")
+  titulos <- nos_links |> html_text2() |> str_squish()
+
+  # Remove entradas com texto curto ou artefatos do CMS (scald=...)
+  validos <- nchar(titulos) > 20 & !grepl("^scald=", titulos)
+  links   <- links[validos]
+  titulos <- titulos[validos]
+
+  # Deduplica (mesmo link pode aparecer em teaser + imagem)
+  idx_unicos <- !duplicated(links)
+  links   <- links[idx_unicos]
+  titulos <- titulos[idx_unicos]
+
+  if (length(links) == 0) return(tibble())
 
   tibble(
-    titulo      = titulos[1:n],
-    link        = links[1:n],
+    titulo      = titulos,
+    link        = paste0("https://agenciabrasil.ebc.com.br", links),
     pagina_num  = pagina_num,
     coletado_em = Sys.time()
   )
