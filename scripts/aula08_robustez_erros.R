@@ -448,13 +448,20 @@ pagina_enc <- tryCatch(
 )
 
 # Remover caracteres de controle se necessário
+#
+# Nota: \x00 (NUL) não é suportado em strings R —
+# o parser rejeita antes de qualquer função ser chamada.
+# O padrão abaixo cobre os demais caracteres de controle
+# que podem aparecer em texto raspado de sites.
+#
 limpar_encoding <- function(texto) {
   texto |>
-    str_remove_all("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]") |>
+    str_remove_all("[\x01-\x08\x0B\x0C\x0E-\x1F]") |>
     str_squish()
 }
 
-limpar_encoding("Texto\x00com\x1Fcaracteres\x0Bestranhos")
+# Caracteres de controle válidos em R: \x01–\x1F exceto \x00
+limpar_encoding("Texto\x01com\x1Fcaracteres\x0Bestranhos")
 
 # =========================================================
 # 13. SCRIPT COMPLETO ROBUSTO
