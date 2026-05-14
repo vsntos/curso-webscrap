@@ -382,8 +382,8 @@ df_portais <- map_dfr(
       return(dados |> mutate(portal = portais$nome[i]))
     }
 
-    # BBC: h3 com links
-    titulos <- pagina |> html_elements("h3") |> html_text2() |> str_squish()
+    # BBC: h2 com links
+    titulos <- pagina |> html_elements("h2") |> html_text2() |> str_squish()
     titulos <- titulos[nchar(titulos) > 20]
     tibble(titulo = titulos, link = NA_character_, portal = portais$nome[i])
   }
