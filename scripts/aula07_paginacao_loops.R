@@ -75,7 +75,31 @@ urls_path <- paste0(
 head(urls_path, 3)
 
 # =========================================================
-# 3. LOOP FOR BÁSICO
+# 3. FUNÇÃO AUXILIAR: EXTRAIR NOTÍCIAS DA AGÊNCIA BRASIL
+# =========================================================
+#
+# Na Agência Brasil os títulos (h2) e os links (a) são
+# elementos separados — não há <a> dentro de <h2>.
+# Extraímos pelo padrão de URL das notícias de cada seção.
+#
+
+extrair_ab <- function(pagina, secao = "internacional") {
+  padrao <- paste0("/", secao, "/noticia/")
+  nos    <- pagina |> html_elements(paste0("a[href*='", padrao, "']"))
+  if (length(nos) == 0) return(tibble(titulo = character(), link = character()))
+  links   <- nos |> html_attr("href")
+  titulos <- nos |> html_text2() |> str_squish()
+  validos <- nchar(titulos) > 20 & !grepl("^scald=", titulos)
+  links   <- links[validos]; titulos <- titulos[validos]
+  idx     <- !duplicated(links)
+  tibble(
+    titulo = titulos[idx],
+    link   = paste0("https://agenciabrasil.ebc.com.br", links[idx])
+  )
+}
+
+# =========================================================
+# 4. LOOP FOR BÁSICO
 # =========================================================
 
 resultados_for <- list()
@@ -102,23 +126,11 @@ for (p in 0:2) {
 
   if (is.null(pagina)) next
 
-  titulos <- pagina |>
-    html_elements("h2") |>
-    html_text2() |>
-    str_squish()
+  dados <- extrair_ab(pagina)
+  if (nrow(dados) == 0) next
 
-  links <- pagina |>
-    html_elements("h2 a") |>
-    html_attr("href")
-
-  n <- min(length(titulos), length(links))
-  if (n == 0) next
-
-  resultados_for[[length(resultados_for) + 1]] <- tibble(
-    titulo = titulos[1:n],
-    link   = links[1:n],
-    pagina = p
-  )
+  resultados_for[[length(resultados_for) + 1]] <- dados |>
+    mutate(pagina = p)
 }
 
 df_for <- bind_rows(resultados_for)
@@ -155,24 +167,10 @@ raspar_pagina_ab <- function(p) {
 
   if (is.null(pagina)) return(tibble())
 
-  titulos <- pagina |>
-    html_elements("h2") |>
-    html_text2() |>
-    str_squish()
+  dados <- extrair_ab(pagina)
+  if (nrow(dados) == 0) return(tibble())
 
-  links <- pagina |>
-    html_elements("h2 a") |>
-    html_attr("href")
-
-  n <- min(length(titulos), length(links))
-  if (n == 0) return(tibble())
-
-  tibble(
-    titulo      = titulos[1:n],
-    link        = links[1:n],
-    pagina      = p,
-    coletado_em = Sys.time()
-  )
+  dados |> mutate(pagina = p, coletado_em = Sys.time())
 }
 
 # Raspar 5 páginas com purrr
@@ -239,23 +237,17 @@ raspar_ate_vazio <- function(url_base, max_paginas = 50) {
       break
     }
 
-    titulos <- pagina |>
-      html_elements("h2") |>
-      html_text2() |>
-      str_squish()
+    dados <- extrair_ab(pagina)
 
     # Parar se não encontrou nada
-    if (length(titulos) == 0) {
+    if (nrow(dados) == 0) {
       cat("Página vazia na página", p, "— encerrando.\n")
       break
     }
 
-    cat(sprintf("[p%d] %d títulos encontrados.\n", p, length(titulos)))
+    cat(sprintf("[p%d] %d títulos encontrados.\n", p, nrow(dados)))
 
-    resultados[[length(resultados) + 1]] <- tibble(
-      titulo = titulos,
-      pagina = p
-    )
+    resultados[[length(resultados) + 1]] <- dados |> mutate(pagina = p)
   }
 
   bind_rows(resultados)
@@ -299,13 +291,9 @@ raspar_seguindo_links <- function(url_inicial, max_paginas = 20) {
     if (is.null(pagina)) break
 
     # Extrair dados
-    titulos <- pagina |>
-      html_elements("h2") |>
-      html_text2() |>
-      str_squish()
-
-    if (length(titulos) > 0) {
-      resultados[[i]] <- tibble(titulo = titulos, pagina = i)
+    dados <- extrair_ab(pagina)
+    if (nrow(dados) > 0) {
+      resultados[[i]] <- dados |> mutate(pagina = i)
     }
 
     # Procurar link para próxima página
@@ -354,13 +342,9 @@ df_secoes <- map_dfr(
 
     if (is.null(pagina)) return(tibble())
 
-    tibble(
-      titulo = pagina |>
-        html_elements("h2") |>
-        html_text2() |>
-        str_squish(),
-      secao = secoes[i]
-    )
+    # Usa extrator genérico com padrão de URL por seção
+    extrair_ab(pagina, secao = secoes[i]) |>
+      mutate(secao = secoes[i])
   }
 )
 
@@ -372,10 +356,10 @@ df_secoes |>
 # =========================================================
 
 portais <- tibble(
-  nome = c("Agência Brasil", "ONU Brasil"),
+  nome = c("Agência Brasil", "BBC Brasil"),
   url  = c(
     "https://agenciabrasil.ebc.com.br/internacional?page=0",
-    "https://brasil.un.org/pt-br/news?page=0"
+    "https://www.bbc.com/portuguese/internacional"
   )
 )
 
@@ -392,13 +376,16 @@ df_portais <- map_dfr(
 
     if (is.null(pagina)) return(tibble())
 
-    tibble(
-      titulo = pagina |>
-        html_elements("h2, h3") |>
-        html_text2() |>
-        str_squish(),
-      portal = portais$nome[i]
-    )
+    # Agência Brasil: extrator específico
+    if (grepl("agenciabrasil", portais$url[i])) {
+      dados <- extrair_ab(pagina)
+      return(dados |> mutate(portal = portais$nome[i]))
+    }
+
+    # BBC: h3 com links
+    titulos <- pagina |> html_elements("h3") |> html_text2() |> str_squish()
+    titulos <- titulos[nchar(titulos) > 20]
+    tibble(titulo = titulos, link = NA_character_, portal = portais$nome[i])
   }
 )
 
@@ -429,14 +416,9 @@ raspar_em_lotes <- function(url_base, n_paginas = 30, lote = 10) {
     )
 
     if (!is.null(pagina)) {
-
-      titulos <- pagina |>
-        html_elements("h2") |>
-        html_text2() |>
-        str_squish()
-
-      if (length(titulos) > 0) {
-        todos[[length(todos) + 1]] <- tibble(titulo = titulos, pagina = p)
+      dados <- extrair_ab(pagina)
+      if (nrow(dados) > 0) {
+        todos[[length(todos) + 1]] <- dados |> mutate(pagina = p)
       }
     }
 
@@ -484,12 +466,7 @@ esperar_com_backoff <- function(tentativa) {
 # 12. PIPELINE COMPLETO EM ESCALA
 # =========================================================
 
-coletar_noticias_escala <- function(
-    url_base,
-    n_paginas    = 20,
-    seletor_titulo = "h2",
-    seletor_link   = "h2 a"
-) {
+coletar_noticias_escala <- function(url_base, n_paginas = 20) {
 
   total <- n_paginas
 
@@ -509,27 +486,9 @@ coletar_noticias_escala <- function(
 
     if (is.null(pagina)) return(tibble())
 
-    titulos <- pagina |>
-      html_elements(seletor_titulo) |>
-      html_text2() |>
-      str_squish()
-
-    links <- pagina |>
-      html_elements(seletor_link) |>
-      html_attr("href")
-
-    n <- min(length(titulos), length(links))
-    if (n == 0) return(tibble())
-
-    tibble(
-      titulo      = titulos[1:n],
-      link        = links[1:n],
-      pagina      = p,
-      coletado_em = Sys.time()
-    )
+    extrair_ab(pagina) |> mutate(pagina = p, coletado_em = Sys.time())
 
   }) |>
-    filter(nchar(titulo) > 20) |>
     distinct(link, .keep_all = TRUE)
 }
 
