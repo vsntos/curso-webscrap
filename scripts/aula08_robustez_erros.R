@@ -35,6 +35,29 @@ library(purrr)
 library(stringr)
 
 # =========================================================
+# HELPER: EXTRATOR DA AGÊNCIA BRASIL
+# =========================================================
+#
+# A Agência Brasil separa <h2> dos <a> — não há <a> dentro
+# de <h2>. Extraímos pelo padrão da URL das notícias.
+#
+
+extrair_ab <- function(pagina, secao = "internacional") {
+  padrao <- paste0("/", secao, "/noticia/")
+  nos    <- pagina |> html_elements(paste0("a[href*='", padrao, "']"))
+  if (length(nos) == 0) return(tibble(titulo = character(), link = character()))
+  links   <- nos |> html_attr("href")
+  titulos <- nos |> html_text2() |> str_squish()
+  validos <- nchar(titulos) > 20 & !grepl("^scald=", titulos)
+  links   <- links[validos]; titulos <- titulos[validos]
+  idx     <- !duplicated(links)
+  tibble(
+    titulo = titulos[idx],
+    link   = paste0("https://agenciabrasil.ebc.com.br", links[idx])
+  )
+}
+
+# =========================================================
 # 2. O PROBLEMA: ERROS QUEBRAM O LOOP
 # =========================================================
 
@@ -314,11 +337,21 @@ raspar_com_log <- function(url) {
   pagina
 }
 
-# Testar
-raspar_com_log("https://agenciabrasil.ebc.com.br/internacional")
-raspar_com_log("https://url-invalida.xyz")
+# raspar_com_log() é um WRAPPER de carregamento com log.
+# Ela retorna o objeto HTML bruto — não extrai dados.
+# Use o retorno com uma função de extração em seguida.
 
-# Ver o log
+pagina_ab  <- raspar_com_log("https://agenciabrasil.ebc.com.br/internacional")
+pagina_inv <- raspar_com_log("https://url-invalida.xyz")
+
+# Extrair notícias da página carregada com sucesso
+if (!is.null(pagina_ab)) {
+  dados_ab <- extrair_ab(pagina_ab)
+  cat(sprintf("%d notícias encontradas.\n", nrow(dados_ab)))
+  print(dados_ab)
+}
+
+# Ver o log gerado
 readLines(log_file)
 
 # =========================================================
@@ -429,21 +462,20 @@ limpar_encoding("Texto\x00com\x1Fcaracteres\x0Bestranhos")
 
 scraper_robusto <- function(
     url_base,
-    n_paginas       = 10,
-    seletor_titulo  = "h2",
-    seletor_link    = "h2 a",
-    delay_min       = 1.0,
-    delay_max       = 2.5,
-    max_tentativas  = 3
+    n_paginas      = 10,
+    secao          = "internacional",
+    delay_min      = 1.0,
+    delay_max      = 2.5,
+    max_tentativas = 3
 ) {
+  #
+  # Usa extrair_ab() definida no topo do script —
+  # funciona para qualquer seção da Agência Brasil.
+  #
 
-  # Criar diretório de output
   if (!dir.exists("data/raw")) dir.create("data/raw", recursive = TRUE)
 
-  # Log da sessão
-  log_sessao <- paste0("logs/sessao_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".txt")
-
-  relatorio <- list(ok = 0, erros = 0, urls = character(0))
+  relatorio <- list(ok = 0, erros = 0)
 
   df <- map_dfr(0:(n_paginas - 1), function(p) {
 
@@ -451,7 +483,7 @@ scraper_robusto <- function(
 
     cat(sprintf("[%d/%d] %s\n", p + 1, n_paginas, url))
 
-    # Retentativas
+    # Retentativas com backoff exponencial
     pagina <- NULL
     for (t in seq_len(max_tentativas)) {
 
@@ -473,30 +505,18 @@ scraper_robusto <- function(
       return(tibble())
     }
 
-    # Extrair
-    titulos <- tryCatch(
-      pagina |> html_elements(seletor_titulo) |> html_text2() |> str_squish(),
-      error = function(e) character(0)
+    # Extrair com helper robusto para a Agência Brasil
+    dados <- tryCatch(
+      extrair_ab(pagina, secao = secao),
+      error = function(e) tibble()
     )
-
-    links <- tryCatch(
-      pagina |> html_elements(seletor_link) |> html_attr("href"),
-      error = function(e) character(0)
-    )
-
-    n <- min(length(titulos), length(links))
 
     relatorio$ok <<- relatorio$ok + 1
-    cat(sprintf("  ✓ %d títulos encontrados.\n", n))
+    cat(sprintf("  ✓ %d notícias encontradas.\n", nrow(dados)))
 
-    if (n == 0) return(tibble())
+    if (nrow(dados) == 0) return(tibble())
 
-    tibble(
-      titulo      = titulos[1:n],
-      link        = links[1:n],
-      pagina      = p,
-      coletado_em = Sys.time()
-    )
+    dados |> mutate(pagina = p, coletado_em = Sys.time())
   })
 
   # Limpeza final
@@ -516,10 +536,11 @@ scraper_robusto <- function(
 
 # Executar
 df_robusto <- scraper_robusto(
-  url_base   = "https://agenciabrasil.ebc.com.br/internacional?page=",
-  n_paginas  = 5,
-  delay_min  = 1.5,
-  delay_max  = 3.0
+  url_base  = "https://agenciabrasil.ebc.com.br/internacional?page=",
+  n_paginas = 5,
+  secao     = "internacional",
+  delay_min = 1.5,
+  delay_max = 3.0
 )
 
 nrow(df_robusto)
